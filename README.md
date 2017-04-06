@@ -1,5 +1,7 @@
 # Komodo - Kotlin Modular Framework
 
+[![Join the chat at https://gitter.im/Heapy/komodo](https://badges.gitter.im/Heapy/komodo.svg)](https://gitter.im/Heapy/komodo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ![Logo](./logo.png)
 
 ## Goals
