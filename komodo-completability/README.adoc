@@ -1,0 +1,3 @@
+=== Komodo Completability
+
+Converts `java.util.concurrent.Future` to `kotlinx.coroutines.Deferred` using single thread and polling.

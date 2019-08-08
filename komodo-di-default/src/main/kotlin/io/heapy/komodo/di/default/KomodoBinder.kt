@@ -144,14 +144,14 @@ class KomodoBinder(
 
     private val modules = mutableMapOf<KClass<out Module>, Boolean>()
 
-    tailrec fun module(module: Module) {
-        val instance = moduleInstance(module)
-
-        instance?.let {
-            it.assemble(this)
-            it.requires.forEach { module(it.createInstance()) }
-        }
-    }
+//    tailrec fun module(module: Module) {
+//        val instance = moduleInstance(module)
+//
+//        instance?.let {
+//            it.assemble(this)
+//            it.requires.forEach { module(it.createInstance()) }
+//        }
+//    }
 
     private fun moduleInstance(module: Module): Module? {
         return null

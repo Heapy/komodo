@@ -12,6 +12,10 @@ package io.heapy.komodo.junit.engine.execution;
 
 import io.heapy.komodo.junit.engine.extension.ExtensionRegistry;
 import kotlin.coroutines.Continuation;
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.test.TestCoroutineScope;
+import kotlinx.coroutines.test.TestCoroutineScopeKt;
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -48,6 +52,8 @@ import static org.junit.platform.commons.util.ReflectionUtils.isAssignableTo;
 @API(status = INTERNAL, since = "5.0")
 public class ExecutableInvoker {
 
+    public static final TestCoroutineScope TEST_COROUTINE_SCOPE = TestCoroutineScopeKt.TestCoroutineScope(EmptyCoroutineContext.INSTANCE);
+    public static final CoroutineScope COROUTINE_SCOPE = () -> EmptyCoroutineContext.INSTANCE;
     private static final Logger logger = LoggerFactory.getLogger(ExecutableInvoker.class);
 
     private static String asLabel(Executable executable) {
@@ -194,6 +200,14 @@ public class ExecutableInvoker {
 
             if (parameterContext.getParameter().getType().equals(Continuation.class)) {
                 return null;
+            }
+
+            if (parameterContext.getParameter().getType().equals(TestCoroutineScope.class)) {
+                return TEST_COROUTINE_SCOPE;
+            }
+
+            if (parameterContext.getParameter().getType().equals(CoroutineScope.class)) {
+                return COROUTINE_SCOPE;
             }
 
             if (matchingResolvers.isEmpty()) {

@@ -70,7 +70,7 @@ bintray {
 
     pkg {
         userOrg = "heapy"
-        repo = isDev ? "heap-dev" : "heap"
+        repo = isDev ? "heap-dev" : "releases"
         name = "komodo"
         websiteUrl = "https://heapy.io/komodo"
         publish = isDev

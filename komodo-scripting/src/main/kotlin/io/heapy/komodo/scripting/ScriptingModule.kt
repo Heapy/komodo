@@ -10,7 +10,7 @@ import io.heapy.komodo.di.Module
  * @since 1.0
  */
 class ScriptingModule : Module {
-    override fun assemble(binder: Binder) {
+    fun assemble(binder: Binder) {
         binder.wire(KotlinScriptCompiler::class).with(DefaultKotlinScriptCompiler())
     }
 }

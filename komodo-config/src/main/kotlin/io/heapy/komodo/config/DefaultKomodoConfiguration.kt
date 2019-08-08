@@ -1,29 +1,26 @@
 package io.heapy.komodo.config
 
 import io.heapy.komodo.exceptions.KomodoException
-import io.heapy.komodo.scripting.DefaultKotlinScriptCompiler
+import io.heapy.komodo.scripting.KotlinScriptCompiler
 import kotlinx.coroutines.sync.Mutex
 import kotlin.reflect.KClass
 
 /**
  * Default implementation if komodo configuration.
  *
- * I assume that you’re using one of the example JSR223 projects, e.g. https://github.com/JetBrains/kotlin/tree/1.1.0/libraries/examples/kotlin-jsr223-daemon-local-eval-example. You need to create a similar one, but use your own factory, by copying and modifying this one - https://github.com/JetBrains/kotlin/blob/1.1.0/libraries/tools/kotlin-script-util/src/main/kotlin/org/jetbrains/kotlin/script/jsr223/KotlinJsr223ScriptEngineFactoryExamples.kt#L49
-In particular you need to replace call to `scriptCompilationClasspathFromContext`, with the minimal classpath needed for your script. You need to make sure that at least `kotlin-script-runtime` and java stdlib is included there.
- *
  * @author Ruslan Ibragimov
  * @since 1.0
  */
 
-class DefaultKomodoConfiguration(
-    private val kotlinConfigurationSources: io.heapy.komodo.config.DefaultKomodoConfigurationSources,
-    private val kotlinScriptCompiler: DefaultKotlinScriptCompiler
-) : io.heapy.komodo.config.KomodoConfiguration {
+class KotlinScriptKomodoConfiguration(
+    private val kotlinConfigurationSources: KomodoConfigurationSources,
+    private val kotlinScriptCompiler: KotlinScriptCompiler
+) : KomodoConfiguration {
     private var configs: List<Any> = listOf()
     private val mutex = Mutex()
 
     @Suppress("UNCHECKED_CAST")
-    suspend override fun <T : Any> getConfig(klass: KClass<T>): T? {
+    override suspend fun <T : Any> getConfig(klass: KClass<T>): T? {
         // TODO: Meh, looks ugly, any better alternatives?
         if (configs.isEmpty()) {
             mutex.lock()
@@ -42,7 +39,7 @@ class DefaultKomodoConfiguration(
         }
     }
 
-    suspend private fun createConfig(): List<Any> {
+    private suspend fun createConfig(): List<Any> {
         return kotlinConfigurationSources.getSources().map { sourceProvider ->
             val result = kotlinScriptCompiler.execute<Any>(sourceProvider.getInputStream())
 

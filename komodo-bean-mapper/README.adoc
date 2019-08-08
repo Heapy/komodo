@@ -1,6 +1,0 @@
-----
-MapObj<S, D>.cp(a::prop1, b::prop2).map(a::list1, b::list1, ::listmapper).run(A, B)
-----
-
-http://mapstruct.org/documentation/dev/reference/html/
-http://commons.apache.org/proper/commons-beanutils/

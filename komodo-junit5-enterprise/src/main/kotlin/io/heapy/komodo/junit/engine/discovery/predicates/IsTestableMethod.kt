@@ -21,27 +21,21 @@ import kotlin.reflect.jvm.kotlinFunction
 /**
  * @since 5.0
  */
-internal abstract class IsTestableMethod(private val annotationType: Class<out Annotation>, private val mustReturnVoid: Boolean) : Predicate<Method> {
+internal abstract class IsTestableMethod(
+    private val annotationType: Class<out Annotation>,
+    private val mustReturnVoid: Boolean
+) : Predicate<Method> {
 
     override fun test(candidate: Method): Boolean {
         // Please do not collapse the following into a single statement.
-        if (isStatic(candidate)) {
-            return false
-        }
-        if (isPrivate(candidate)) {
-            return false
-        }
-        if (isAbstract(candidate)) {
-            return false
-        }
-        if (!isSuspend(candidate)) {
-            return false
-        }
+        if (isStatic(candidate)) return false
+        if (isPrivate(candidate)) return false
+        if (isAbstract(candidate)) return false
+        if (!isSuspend(candidate)) return false
         return isAnnotated(candidate, this.annotationType)
     }
 
     internal fun isSuspend(candidate: Method): Boolean {
         return candidate.kotlinFunction?.isSuspend ?: false
     }
-
 }

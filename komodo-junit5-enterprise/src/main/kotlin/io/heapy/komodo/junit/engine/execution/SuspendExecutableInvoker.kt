@@ -1,6 +1,8 @@
 package io.heapy.komodo.junit.engine.execution
 
+import io.heapy.komodo.junit.engine.execution.ExecutableInvoker.COROUTINE_SCOPE
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.platform.commons.util.ExceptionUtils
 import org.junit.platform.commons.util.Preconditions
 import org.junit.platform.commons.util.ReflectionUtils.isStatic
@@ -25,8 +27,29 @@ fun invokeMethod(method: Method, target: Any?, vararg args: Any): Any? {
     ) { String.format("Cannot invoke non-static method [%s] on a null target.", method.toGenericString()) }
 
     try {
-        return runBlocking {
-            makeAccessible(method).kotlinFunction?.callSuspend(target, *args.dropLast(1).toTypedArray())
+        val params = args.asList().dropLast(1)
+        if (params.contains(ExecutableInvoker.TEST_COROUTINE_SCOPE)) {
+            return runBlockingTest {
+                val callArgs = params.map {
+                    if (it == ExecutableInvoker.TEST_COROUTINE_SCOPE) this
+                    else it
+                }.toTypedArray()
+
+                makeAccessible(method).kotlinFunction?.callSuspend(target, *callArgs)
+            }
+        } else if (params.contains(COROUTINE_SCOPE)) {
+            return runBlocking {
+                val callArgs = params.map {
+                    if (it == ExecutableInvoker.COROUTINE_SCOPE) this
+                    else it
+                }.toTypedArray()
+
+                makeAccessible(method).kotlinFunction?.callSuspend(target, *callArgs)
+            }
+        } else {
+            return runBlocking {
+                makeAccessible(method).kotlinFunction?.callSuspend(target, *params.toTypedArray())
+            }
         }
     } catch (t: Throwable) {
         throw ExceptionUtils.throwAsUncheckedException(getUnderlyingCause(t))

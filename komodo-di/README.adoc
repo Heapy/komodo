@@ -1,0 +1,6 @@
+
+First-class concepts:
+
+- interface, constructor based injection
+- bean condition (on missing bean, on existing class, boolean expression with injection
+- wrapping (can wrap in aop)
