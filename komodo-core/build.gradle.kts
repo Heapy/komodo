@@ -1,5 +1,11 @@
+group = "io.heapy.komodo"
+
+plugins {
+    id("io.heapy.build.jvm")
+    id("io.heapy.publish")
+}
+
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    compile(project(":komodo-di"))
-    compile("org.funktionale:funktionale-either:1.2")
+    api(project(":komodo-env"))
+    api(project(":komodo-di"))
 }

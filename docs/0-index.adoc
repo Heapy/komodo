@@ -1,0 +1,42 @@
+:komodo-version: 1.0.0
+= Komodo Documentation
+
+> This documentation describes default Komodo setup. You can customize every part of komodo, even rewrite all implementations of standard services and replace interfaces and DI. But more practical and easy - use default services.
+
+== Hello, World!
+
+[source,kotlin]
+----
+komodo {
+    module(TestModule1::class)
+}
+----
+
+== Configuration
+
+Configuration stored in Kotlin Script `.kts` files. Every configuration return either one configuration object, of list of objects.
+You can pass list of configuration files to Komodo and objects of one type will be overwrited by rule - last write wins. So if you pass two files with instances of one class - object in second passed file will win.
+
+include::1-contributors.adoc[]
+
+<<<
+
+include::2-getting-started.adoc[]
+
+<<<
+
+include::3-development.adoc[]
+
+<<<
+
+include::4-modules.adoc[]
+
+<<<
+
+include::5-vision.adoc[]
+
+<<<
+
+== Modules
+
+include::../komodo-bom/README.adoc[]

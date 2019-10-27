@@ -1,8 +1,11 @@
-dependencies {
-    compile(project(":komodo-env"))
-    compile(project(":komodo-core"))
+group = "io.heapy.komodo"
 
-    // kotlin & coroutines
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
+plugins {
+    id("io.heapy.build.jvm")
+    id("io.heapy.publish")
+}
+
+dependencies {
+    api(project(":komodo-env"))
+    api(project(":komodo-core"))
 }

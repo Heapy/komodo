@@ -1,8 +1,5 @@
-apply(plugin = "maven")
+group = "io.heapy.komodo"
 
-dependencyManagement {
-    dependencies {
-        //sample of library dependency
-        //dependency("io.heapy:komodo:0.10")
-    }
+plugins {
+    id("io.heapy.publish")
 }

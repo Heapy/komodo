@@ -1,9 +1,4 @@
-@file:JvmName("Hello")
-
 package io.heapy.komodo.command
-
-import org.funktionale.either.Either
-
 
 /**
  * Base command interface
@@ -13,8 +8,7 @@ import org.funktionale.either.Either
  */
 interface Command<out R> {
     val name: String
-    fun run(arguments: io.heapy.komodo.command.CommandArguments): Either<Exception, R>
+    suspend fun run(arguments: CommandArguments): R
 }
 
 class CommandArguments
-

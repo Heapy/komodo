@@ -1,6 +1,6 @@
 package io.heapy.komodo.scripting
 
-import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory
 import java.io.InputStream
@@ -13,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
  * @since 1.0
  */
 class DefaultKotlinScriptCompiler(
-    private val context: CoroutineContext = newSingleThreadContext("DefaultKotlinScriptCompiler")
+    private val context: CoroutineContext = Dispatchers.IO
 ) : KotlinScriptCompiler {
     private val factory = KotlinJsr223JvmLocalScriptEngineFactory()
     private val scriptEngine = factory.scriptEngine

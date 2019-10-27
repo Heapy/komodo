@@ -5,3 +5,6 @@ build
 # Intellij IDEA
 out
 .idea
+
+# Working files
+/projects/

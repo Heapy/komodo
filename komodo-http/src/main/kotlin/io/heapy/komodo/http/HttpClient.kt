@@ -16,23 +16,6 @@ import org.apache.http.impl.nio.client.HttpAsyncClients
 import org.apache.http.nio.client.HttpAsyncClient
 
 /**
- * TODO.
- *
- * @author Ruslan Ibragimov
- * @since 1.0
- */
-interface HttpClient {
-
-}
-
-val banner = """
-⣿⣿⡿⠋⠉⠉⡩⠋
-⡿⠋⠀⠀⡠⠊
-⡇⠀⣠⣾⣷⣄
-⣧⣾⣿⣿⣿⣿⣷⣄
-"""
-
-/**
  * Coroutines adapter for [HttpAsyncClient.execute].
  */
 suspend fun HttpAsyncClient.execute(request: HttpUriRequest): HttpResponse {

@@ -1,5 +1,3 @@
-https://zeroturnaround.com/rebellabs/using-buildsrc-for-custom-logic-in-gradle-builds/[https://zeroturnaround.com/rebellabs/using-buildsrc-for-custom-logic-in-gradle-builds/]
-
 https://github.com/aatarasoff/kotlin-script-starter[https://github.com/aatarasoff/kotlin-script-starter]
 
 http://pholser.github.io/jopt-simple/[http://pholser.github.io/jopt-simple/]

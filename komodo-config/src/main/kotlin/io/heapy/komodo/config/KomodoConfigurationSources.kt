@@ -1,6 +1,6 @@
 package io.heapy.komodo.config
 
-import io.heapy.komodo.file.InputStreamProvider
+import io.heapy.komodo.file.ByteStreamProvider
 
 /**
  * Provides configuration data.
@@ -9,5 +9,5 @@ import io.heapy.komodo.file.InputStreamProvider
  * @since 1.0
  */
 interface KomodoConfigurationSources {
-    fun getSources(): List<InputStreamProvider>
+    fun getSources(): List<ByteStreamProvider>
 }

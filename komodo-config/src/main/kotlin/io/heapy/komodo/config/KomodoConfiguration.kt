@@ -1,6 +1,7 @@
 package io.heapy.komodo.config
 
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * Marker Interface for configuration classes.
@@ -9,5 +10,9 @@ import kotlin.reflect.KClass
  * @since 1.0
  */
 interface KomodoConfiguration {
-    suspend fun <T : Any> getConfig(klass: KClass<T>): T?
+    suspend fun <T : Any> getConfig(type: KType): T?
+}
+
+suspend inline fun <reified T : Any> KomodoConfiguration.getConfig(): T? {
+    return getConfig(typeOf<T>())
 }

@@ -16,17 +16,9 @@ after_success:
 
 deploy:
   - provider: script
-    script: bash deploy.sh tag
+    script: ./gradlew bintrayUpload
     skip_cleanup: true
     on:
-      tags: true
-      repo: Heapy/komodo
-      jdk: oraclejdk8
-  - provider: script
-    script: bash deploy.sh dev
-    skip_cleanup: true
-    on:
-      tags: false
       repo: Heapy/komodo
       jdk: oraclejdk8
 

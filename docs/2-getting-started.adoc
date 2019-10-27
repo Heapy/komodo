@@ -1,0 +1,13 @@
+== Getting Started
+
+TODO:
+
+* gradle/maven
+* main
+* run
+* deploy
+
+Two types of docs:
+
+- reference
+- conceptual (Learning)

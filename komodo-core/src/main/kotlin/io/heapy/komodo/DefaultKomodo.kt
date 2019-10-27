@@ -1,6 +1,5 @@
 package io.heapy.komodo
 
-import io.heapy.komodo.Komodo
 import io.heapy.komodo.di.Module
 import kotlin.reflect.KClass
 

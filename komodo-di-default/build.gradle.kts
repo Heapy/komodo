@@ -1,9 +1,14 @@
+import io.heapy.Libs.kotlinReflect
+
+group = "io.heapy.komodo"
+
+plugins {
+    id("io.heapy.build.jvm")
+    id("io.heapy.publish")
+}
+
 dependencies {
-    compile(project(":komodo-di"))
+    implementation(project(":komodo-di"))
 
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    compile("org.jetbrains.kotlin:kotlin-reflect")
-
-    testImplementation("io.mockk:mockk")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+    implementation(kotlinReflect.dep())
 }

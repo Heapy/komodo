@@ -33,5 +33,7 @@ See [Collective Code Construction Contract](./Collective%20Code%20Construction%2
 
 ## Licence
 
-Komodo is **Free Software** released under the **[GNU GPLv3](https://github.com/Heapy/komodo/blob/master/LICENSE)** license.
+![LGPL-3.0-or-later](./docs/lgplv3-with-text-154x68.png)
+
+Komodo is **Free Software** released under the **[LGPL-3.0-or-later](https://github.com/Heapy/komodo/blob/master/LICENSE)** license.
 

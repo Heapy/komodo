@@ -1,8 +1,19 @@
 group = "io.heapy.komodo"
 
-apply(from = "$rootDir/publish.gradle")
+//plugins {
+//    kotlin("multiplatform")
+//}
+//
+//kotlin {
+//    jvm()
+//}
+//apply(from = "$rootDir/publish.gradle")
 
-dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    api("org.slf4j:slf4j-api")
-}
+//dependencies {
+//    implementation(kotlinStdlib)
+//    api(slf4jApi)
+//
+//    testImplementation(jupiterApi)
+//    testRuntimeOnly(jupiterEngine)
+//    testImplementation(mockk)
+//}

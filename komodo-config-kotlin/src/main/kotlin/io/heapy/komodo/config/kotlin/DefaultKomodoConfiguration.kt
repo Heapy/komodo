@@ -13,7 +13,6 @@ import kotlin.reflect.KClass
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-
 class KotlinScriptKomodoConfiguration(
     private val kotlinConfigurationSources: KomodoConfigurationSources,
     private val kotlinScriptCompiler: KotlinScriptCompiler
@@ -43,7 +42,7 @@ class KotlinScriptKomodoConfiguration(
 
     private suspend fun createConfig(): List<Any> {
         return kotlinConfigurationSources.getSources().map { sourceProvider ->
-            val result = kotlinScriptCompiler.execute<Any>(sourceProvider.getInputStream())
+            val result = kotlinScriptCompiler.execute<Any>(sourceProvider.getByteStream())
 
             when (result) {
                 is List<*> -> result.filterNotNull()

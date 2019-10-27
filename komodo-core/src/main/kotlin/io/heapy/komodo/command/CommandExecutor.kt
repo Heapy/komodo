@@ -1,13 +1,11 @@
 package io.heapy.komodo.command
 
-import org.funktionale.either.Either
-
 /**
- * TODO.
+ * Finds command by name and executes it.
  *
  * @author Ruslan Ibragimov
  * @since 1.0
  */
 interface CommandExecutor {
-    fun <R> execute(name: String): Either<Exception, R>
+    suspend fun <R> execute(name: String): R
 }

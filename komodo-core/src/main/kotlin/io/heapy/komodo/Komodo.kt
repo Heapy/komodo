@@ -1,7 +1,7 @@
 package io.heapy.komodo
 
-import kotlin.reflect.KClass
 import io.heapy.komodo.di.Module
+import kotlin.reflect.KClass
 
 interface Komodo {
     fun args(args: Array<String>): Komodo

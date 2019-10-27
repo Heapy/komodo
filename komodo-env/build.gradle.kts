@@ -1,8 +1,9 @@
 group = "io.heapy.komodo"
 
-apply(from = "$rootDir/publish.gradle")
+plugins {
+    id("io.heapy.build.jvm")
+    id("io.heapy.publish")
+}
 
 dependencies {
-    // kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 }

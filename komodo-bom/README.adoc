@@ -1,0 +1,16 @@
+=== Komodo BOM
+
+Provides so called *BOM* - Bill Of Materials. It's just *pom* with *dependencyManagement* section. It's helps end users of komodo to use the same dependency versions of libraries, that komodo uses.
+
+Example:
+
+[source,kotlin,subs="attributes+"]
+----
+dependencies {
+    // import a BOM
+    implementation(platform("io.heapy.komodo:komodo-bom:{komodo-version}"))
+
+    implementation("io.heapy.komodo:komodo-logging") // no version required, set to {komodo-version} automatically
+    implementation("org.slf4j:slf4j-api") // no version required, set to version that shipped with komodo
+}
+----
