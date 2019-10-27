@@ -40,6 +40,8 @@ class KomodoJvmPlugin : Plugin<Project> {
     }
 
     private fun Project.config() {
+        val bytecodeVersion = JavaVersion.VERSION_1_8
+
         tasks.withType<KotlinCompile> {
             kotlinOptions {
                 freeCompilerArgs = freeCompilerArgs + listOf(
@@ -47,13 +49,13 @@ class KomodoJvmPlugin : Plugin<Project> {
                     "-Xuse-experimental=kotlin.Experimental",
                     "-Xuse-experimental=kotlin.ExperimentalStdlibApi"
                 )
-                jvmTarget = JavaVersion.VERSION_1_8.majorVersion
+                jvmTarget = bytecodeVersion.toString()
             }
         }
 
         extensions.getByType(JavaPluginExtension::class.java).apply {
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
+            sourceCompatibility = bytecodeVersion
+            targetCompatibility = bytecodeVersion
         }
     }
 
