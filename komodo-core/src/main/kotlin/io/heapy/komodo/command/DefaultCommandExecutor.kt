@@ -1,23 +1,24 @@
 package io.heapy.komodo.command
 
+import io.heapy.komodo.exceptions.KomodoException
+import io.heapy.komodo.shutdown.ShutdownManager
+
 /**
  * @author Ruslan Ibragimov
  * @since 1.0
  */
 class DefaultCommandExecutor(
-    private val commands: List<Command<*>>
+    private val commands: List<Command>,
+    private val shutdownManager: ShutdownManager
 ) : CommandExecutor {
-    override suspend fun <R> execute(name: String): R {
+    override suspend fun execute(name: String) {
         val command = commands.find { it.name == name }
+            ?: shutdownManager.shutdown(CommandNotFoundException(name))
 
-        return (command ?: NoopCommand).run(CommandArguments()) as R
+        return command.run()
     }
 }
 
-object NoopCommand : Command<Unit> {
-    override val name: String = "noop"
-
-    override suspend fun run(arguments: CommandArguments) {
-        println("Noop command.")
-    }
-}
+private class CommandNotFoundException(
+    name: String
+) : KomodoException("Command with name $name not found.", "CORE", "0001")

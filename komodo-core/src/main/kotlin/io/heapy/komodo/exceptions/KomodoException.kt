@@ -6,10 +6,13 @@ package io.heapy.komodo.exceptions
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-class KomodoException(
-    private val code: String
+open class KomodoException(
+    override val message: String,
+    private val module: String,
+    private val code: String,
+    override val cause: Throwable? = null
 ) : RuntimeException() {
     override fun toString(): String {
-        return "KomodoException(code='$code')"
+        return "KOMODO-$module-$code: $message"
     }
 }

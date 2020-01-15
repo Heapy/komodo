@@ -14,6 +14,6 @@ class ClasspathByteStreamProvider(
 ) : ByteStreamProvider {
     override fun getByteStream(): InputStream {
         val stream: InputStream? = ClasspathByteStreamProvider::class.java.classLoader.getResourceAsStream(path)
-        return stream ?: throw KomodoException("CORE-1")
+        return stream ?: throw KomodoException("Classpath resource for $path not found", "CORE", "0002")
     }
 }

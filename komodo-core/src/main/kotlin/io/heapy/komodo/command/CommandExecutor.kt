@@ -7,5 +7,5 @@ package io.heapy.komodo.command
  * @since 1.0
  */
 interface CommandExecutor {
-    suspend fun <R> execute(name: String): R
+    suspend fun execute(name: String)
 }

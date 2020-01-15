@@ -11,6 +11,7 @@ class DefaultKomodo : Komodo {
     private val modules = mutableListOf<Module>()
     private val args = mutableListOf<String>()
     private val env = mutableMapOf<String, String>()
+    private val props = mutableMapOf<String, String>()
 
     override fun module(module: Module): Komodo {
         modules += module
@@ -24,6 +25,11 @@ class DefaultKomodo : Komodo {
 
     override fun env(env: Map<String, String>): Komodo {
         this.env += env
+        return this
+    }
+
+    override fun props(props: Map<String, String>): Komodo {
+        this.props += props
         return this
     }
 

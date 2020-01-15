@@ -1,55 +1,201 @@
+@file:Suppress("RedundantVisibilityModifier")
+
 package io.heapy.komodo.di
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.jvm.jvmErasure
 import kotlin.reflect.typeOf
 
 /**
  * Interface for defining user modules.
+ * Usually you likely may use [module] function instead.
  *
  * @author Ruslan Ibragimov
- * @since 1.0
+ * @since 0.1.0
  */
-@ModuleDSL
-interface Module {
-    val bindings: Map<Key, BeanDefinition<*>>
-    fun add(definition: BeanDefinition<*>)
+public interface Module {
+    public fun getBindings(): ModuleBuilder
 }
 
-class DefaultModule : Module {
-    override val bindings: MutableMap<Key, BeanDefinition<*>> = mutableMapOf()
+class ContextException(override val message: String) : RuntimeException()
 
-    override fun add(definition: BeanDefinition<*>) {
-        bindings[definition.key] = definition
-    }
+typealias ModuleBuilder = Binder.() -> Unit
+
+/**
+ * Binder used to collect all [BeanDefinition]s and create context later.
+ *
+ * @author Ruslan Ibragimov
+ * @since 0.1.0
+ */
+interface Binder {
+    fun contribute(definition: BeanDefinition<*, *>)
 }
 
-class BeanDefinition<T : Any>(
-    val key: Key
+class BeanDefinition<I : Any, C : I>(
+    internal val classKey: Key,
+    internal val interfaceKey: Key,
+    internal val isProvider: Boolean = false,
+    internal var instance: Any? = null,
+    internal var provider: Provider<*>? = null
+)
+
+class BeanDefinitionBak<I : Any, C : I>(
+    internal val list: Boolean = false,
+    internal var wrapper: KType? = null
 ) {
-    fun implements(iface: KClass<out T>) {
+    internal var initMethod: (C.() -> Any)? = null
+
+    @ModuleDSL
+    fun initMethod(function: C.() -> Any): BeanDefinitionBak<I, C> {
+        initMethod = function
+        return this
+    }
+
+    fun wrap(wrapper: I): BeanDefinitionBak<I, C> {
+        return this
     }
 }
 
-inline fun <reified T : Any> buildContextAndGet(modules: List<Module>): T {
-    val bindings = modules.fold(mutableMapOf<Key, BeanDefinition<*>>()) { acc, module ->
-        acc.putAll(module.bindings)
-        acc
+interface Context {
+    suspend fun <T : Any> get(key: Key): T
+    suspend fun <T : Any> getOrNull(key: Key): T? {
+        return try {
+            get(key)
+        } catch (e: Exception) {
+            null
+        }
+    }
+}
+
+class KomodoContext(
+    private val definitions: Map<Key, BeanDefinition<*, *>>
+) : Context {
+    override suspend fun <T : Any> get(key: Key): T {
+        return if (key.type.isSubtypeOf(typeOf<Provider<*>>())) {
+            try {
+                createType(key, definitions) as T
+            } catch (e: Exception) {
+                object : Provider<Any> {
+                    override suspend fun getInstance(): Any {
+                        return createType(Key(key.type.arguments.first().type!!), definitions) as Any
+                    }
+                } as T
+            }
+        } else {
+            createType(key, definitions) as T
+        }
+    }
+}
+
+class KomodoBinder : Binder {
+    private val definitions = mutableMapOf<Key, BeanDefinition<*, *>>()
+
+    override fun contribute(definition: BeanDefinition<*, *>) {
+        definitions[definition.interfaceKey] = definition
     }
 
+    fun createContext(): Context {
+        return KomodoContext(definitions.toMap())
+    }
+}
+
+suspend inline fun <reified T : Any> createContextAndGet(
+    vararg modules: KClass<out Module>
+): T {
+    val binder = KomodoBinder()
+    modules.forEach { module -> createModuleInstance(module).getBindings().invoke(binder) }
     val key = Key(typeOf<T>())
-    val beanDefinition = bindings[key]
-    return createType(beanDefinition!!.key.type, bindings) as T
+    return binder.createContext().get(key)
 }
 
-fun createType(type: KType, bindings: Map<Key, BeanDefinition<*>>): Any {
-    val optional = type.isMarkedNullable
+fun createModuleInstance(module: KClass<out Module>): Module {
+    return module.createInstance()
+}
 
-    val ctr = type.jvmErasure.primaryConstructor!!
-    val params = ctr.parameters.map { createType(it.type, bindings) }.toTypedArray()
-    return ctr.call(*params)
+suspend fun createType(
+    key: Key,
+    definitions: Map<Key, BeanDefinition<*, *>>,
+    stack: MutableList<Key> = mutableListOf()
+): Any? {
+    if (stack.contains(key)) {
+        throw ContextException("A circular dependency found: ${printCircularDependencyGraph(key, stack, definitions)}")
+    }
+
+    val isOptional = key.type.isMarkedNullable
+    val binding = definitions[key]
+
+    return if (binding == null) {
+        if (isOptional) {
+            null
+        } else {
+            throw ContextException("Required $key not found in context.")
+        }
+    } else {
+        if (binding.instance != null) {
+            return binding.instance
+        }
+
+        // TODO: Don't create anything, but just save all actions and metadata,
+        //   it will allow to implement dry-run and
+        //   and create source code - equivalent of DI
+        val type = binding.classKey.type
+        val clazz = type.classifier as KClass<*>
+        val ctr = clazz.primaryConstructor ?: throw ContextException("The primary constructor is missing.")
+        stack.add(key)
+        val params = ctr.parameters.associateWith {
+            createType(Key(it.type), definitions, stack)
+        }
+        stack.remove(key)
+
+        val instance = if (binding.isProvider) {
+            val cached = binding.provider?.getInstance()
+            if (cached == null) {
+                val provider = (ctr.callBy(params) as Provider<*>)
+                binding.provider = provider
+                provider.getInstance()
+            } else {
+                cached
+            }
+        } else {
+            ctr.callBy(params)
+        }
+
+        binding.instance = instance
+
+        instance
+    }
+}
+
+fun printCircularDependencyGraph(
+    key: Key,
+    stack: MutableList<Key>,
+    definitions: Map<Key, BeanDefinition<*, *>>
+): String {
+    return buildString {
+        appendln()
+        stack.forEachIndexed { idx, stackKey ->
+            append(" ".repeat(idx * 2))
+            append(stackKey.type.classifier)
+            definitions[stackKey]?.let {
+                append(" implemented by ")
+                append(it.classKey.type.classifier)
+            }
+            if (stackKey == key) {
+                appendln(" <-- Circular dependency starts here")
+            } else {
+                appendln()
+            }
+        }
+        append(" ".repeat(stack.size * 2))
+        append(key.type.classifier)
+        definitions[key]?.let {
+            append(" implemented by ")
+            append((it.classKey.type.classifier as KClass<*>).simpleName)
+        }
+    }
 }
 
 data class Key(
@@ -76,9 +222,6 @@ interface Provider<out T> {
     suspend fun getInstance(): T
 }
 
-
-// 1. Inject Provider of any bean (useful for custom scopes)
-// 2. Optional injection (for top-level types with `?`)
 // 3. Support override of dependencies (through optional wrapping?, i.e. override particular case of decoration)
 
 // TODO: Provide configuration overview - like what classes overwrite by other classes. modules loaded. etc
@@ -94,6 +237,7 @@ interface Provider<out T> {
 // Scopes
 // We support only singleton scope, since other scopes can be implemented in user space based on singleton scope
 // And session/request scope should be managed by underline request framework.
+// Inject Provider of any bean (useful for custom scopes)
 
 // Cyclic Dependencies
 // We doesn't support cyclic dependencies, instead of "hacking" classes thought proxies, setters and field injections
@@ -104,82 +248,135 @@ interface Provider<out T> {
 // class Foo(val bar: Bar?)
 // bar - is optional dependency
 
+// start/stop functions
+// order problem: https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/DependsOn.html
+
+// warmUp function - top level function that can be executed before server will be started
 
 //bind(TransactionLog::class.java).to(DatabaseTransactionLog::class.java)
 //bind(DatabaseTransactionLog::class.java).to(MySqlDatabaseTransactionLog::class.java)
 // get TransactionLog -> MySqlDatabaseTransactionLog
 
 @ModuleDSL
-fun module(builder: Module.() -> Unit): Module {
-    return (DefaultModule()).also(builder)
+inline fun <reified C : Any> Binder.bindConcrete(): BeanDefinition<C, C> {
+    val classKey = Key(typeOf<C>())
+    return BeanDefinition<C, C>(
+        classKey = classKey,
+        interfaceKey = classKey
+    ).also {
+        contribute(it)
+    }
 }
 
 @ModuleDSL
-fun Module.include(vararg module: Module) {
+inline fun <reified I : Any, reified C : I> Binder.bind(): BeanDefinition<I, C> {
+    return BeanDefinition<I, C>(
+        classKey = Key(typeOf<C>()),
+        interfaceKey = Key(typeOf<I>())
+    ).also {
+        contribute(it)
+    }
 }
 
 @ModuleDSL
-inline fun <reified R : Any> Module.create() {
-    add(BeanDefinition<R>(key = Key(typeOf<R>())))
+inline fun <reified I : Any, reified P : Provider<I>> Binder.provide(): BeanDefinition<P, P> {
+    return BeanDefinition<P, P>(
+        classKey = Key(typeOf<P>()),
+        interfaceKey = Key(typeOf<I>()),
+        isProvider = true
+    ).also {
+        contribute(it)
+    }
 }
 
 @ModuleDSL
-inline fun <reified R : Any> Module.createList() {
-    add(BeanDefinition<R>(key = Key(typeOf<List<R>>())))
+inline fun <reified R : Any> Binder.createList() {
+//    contribute(BeanDefinition<R, R>(
+//        key = Key(typeOf<List<R>>()),
+//        iface = R::class,
+//        list = true
+//    ))
 }
 
-inline fun <reified R> Module.create(factory: () -> R) {
-
-}
-
-inline fun <reified A : Any, reified R> Module.create(factory: (A) -> R) {
-
-}
-
-inline fun <reified A : Any, reified B : Any, reified R> Module.create(factory: (A, B) -> R) {
-
-}
-
-inline fun <reified A : Any, reified B : Any, reified C : Any, reified R> Module.create(factory: (A, B, C) -> R) {
-
-}
-
-inline fun <reified A : Any, reified B : Any, reified C : Any, reified D : Any, reified R> Module.create(factory: (A, B, C, D) -> R) {
-
-}
-
-inline fun <reified A : Any, reified B : Any, reified C : Any, reified D : Any, reified E : Any, reified R> Module.create(factory: (A, B, C, D, E) -> R) {
-
-}
-
-data class TestList<T>(
-    val list: List<T>
-)
-
-class Test1
-class Test2
-class Test(val t1: Test1, val test2: Test2)
-
-val api = module {
-    createList<Int>()
-    create(::Test1)
-    create(::Test)
-}
-
-fun main() {
-    val m1 = module {
-        create<Test1>()
+interface ITest1
+class Test1(val test2: Test2) : ITest1 {
+    init {
+        println("Test1")
     }
 
-    val m2 = module {
-        create<Test2>()
+    fun start() {}
+    fun start1(): Int = 1
+}
+
+interface ITest2
+class Test2 : ITest2 {
+    init {
+        println("Test2")
+    }
+}
+class Test2Provider : Provider<Test2> {
+    init {
+        println("Test2Provider")
     }
 
-    val m3 = module {
-        create<Test>()
+    override suspend fun getInstance(): Test2 {
+        return Test2()
     }
+}
 
-    val test = buildContextAndGet<Test>(listOf(m1, m2, m3))
+class Test3
+
+class Test(val t1: ITest1, val test2: Test2) {
+    init {
+        println("Test")
+    }
+}
+
+class Module1 : Module {
+    override fun getBindings(): ModuleBuilder = {
+        bind<ITest1, Test1>()
+//        bindConcrete<Test2>()
+        provide<Test2, Test2Provider>()
+    }
+}
+
+class Module2 : Module {
+    override fun getBindings(): ModuleBuilder = {}
+}
+
+class Module3 : Module {
+    override fun getBindings(): ModuleBuilder = {
+        bindConcrete<Test>()
+    }
+}
+
+class TestModule : Module {
+    override fun getBindings(): ModuleBuilder = {
+        bindConcrete<Test3>()
+    }
+}
+
+suspend fun main() {
+    val testProvider = createContextAndGet<Provider<Test>>(Module1::class, Module2::class, Module3::class)
+
+    val test = testProvider.getInstance()
     println(test.t1)
+    println((test.t1 as Test1).test2)
     println(test.test2)
+}
+
+class ModuleDelegation : Module {
+    override fun getBindings(): ModuleBuilder = {
+        bind<IE1, IE2>()
+        bind<IE2, IE3>()
+    }
+}
+
+interface IE1
+interface IE2 : IE1
+class IE3 : IE2
+
+suspend fun testDelegation() {
+    val ie1 = createContextAndGet<IE1>(ModuleDelegation::class)
+    println(ie1)
 }

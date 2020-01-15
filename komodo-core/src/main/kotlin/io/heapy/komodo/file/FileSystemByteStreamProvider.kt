@@ -19,7 +19,7 @@ class FileSystemByteStreamProvider(
         return try {
             Files.newInputStream(Paths.get(path))
         } catch (e: IOException) {
-            throw KomodoException("CORE-1")
+            throw KomodoException("Filesystem resource for $path not found", "CORE", "0003", e)
         }
     }
 }

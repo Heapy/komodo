@@ -6,9 +6,7 @@ package io.heapy.komodo.command
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-interface Command<out R> {
+interface Command {
     val name: String
-    suspend fun run(arguments: CommandArguments): R
+    suspend fun run()
 }
-
-class CommandArguments
