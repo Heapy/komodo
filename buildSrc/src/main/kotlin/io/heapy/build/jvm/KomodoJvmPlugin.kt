@@ -32,11 +32,13 @@ class KomodoJvmPlugin : Plugin<Project> {
         project.config()
     }
 
-    private fun Project.kotlin() = dependencies {
+    private fun Project.kotlin() {
         plugins.apply("org.jetbrains.kotlin.jvm")
 
-        add("implementation", kotlinStdlib.dep())
-        add("implementation", kotlinxCoroutines.dep())
+        dependencies {
+            add("implementation", kotlinStdlib.dep())
+            add("implementation", kotlinxCoroutines.dep())
+        }
     }
 
     private fun Project.config() {
@@ -59,19 +61,21 @@ class KomodoJvmPlugin : Plugin<Project> {
         }
     }
 
-    private fun Project.test() = dependencies {
+    private fun Project.test() {
         tasks.withType<Test> {
             useJUnitPlatform()
 
             extensions.getByType(JacocoTaskExtension::class.java).apply {
-                setDestinationFile(file("$buildDir/jacoco/module.exec"))
+                destinationFile = file("$buildDir/jacoco/module.exec")
             }
         }
 
-        add("testImplementation", mockk.dep())
-        add("testImplementation", jupiterApi.dep())
-        add("testRuntimeOnly", jupiterEngine.dep())
-        add("testRuntimeOnly", junitPlatformLauncher.dep())
+        dependencies {
+            add("testImplementation", mockk.dep())
+            add("testImplementation", jupiterApi.dep())
+            add("testRuntimeOnly", jupiterEngine.dep())
+            add("testRuntimeOnly", junitPlatformLauncher.dep())
+        }
     }
 
     private fun Project.coverage() {
