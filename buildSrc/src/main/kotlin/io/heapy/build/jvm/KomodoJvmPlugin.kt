@@ -66,7 +66,9 @@ class KomodoJvmPlugin : Plugin<Project> {
             useJUnitPlatform()
 
             extensions.getByType(JacocoTaskExtension::class.java).apply {
-                destinationFile = file("$buildDir/jacoco/module.exec")
+                // Val cannot be reassigned
+                // destinationFile = file("$buildDir/jacoco/module.exec")
+                setDestinationFile(file("$buildDir/jacoco/module.exec"))
             }
         }
 
