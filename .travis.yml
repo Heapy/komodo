@@ -8,12 +8,16 @@ jdk:
   - openjdk8
   - openjdk11
 
+addons:
+  ssh_known_hosts: heapy.io
+
 jobs:
   allow_failures:
     - jdk: openjdk11
 
 script:
   - ./gradlew check :jacocoRootReport
+  - ./gradlew asciidoctor asciidoctorPdf
 
 after_success:
   - bash ./.ci/codecov-8a28df4.sh
@@ -21,6 +25,13 @@ after_success:
 deploy:
   - provider: script
     script: ./gradlew bintrayUpload
+    skip_cleanup: true
+    on:
+      all_branches: true
+      repo: Heapy/komodo
+      jdk: openjdk8
+  - provider: script
+    script: bash .ci/deploy-docs.sh
     skip_cleanup: true
     on:
       all_branches: true

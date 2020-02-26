@@ -16,6 +16,7 @@ modules(
     "komodo-core-coroutines",
     "komodo-core-concurrent",
     "komodo-core-beans",
+    "komodo-docs",
     "komodo-di",
     "komodo-di-default",
     "komodo-env",

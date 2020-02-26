@@ -1,6 +1,8 @@
 :komodo-version: 1.0.0
 = Komodo Documentation
 
+image::logo.png[align=center]
+
 > This documentation describes default Komodo setup. You can customize every part of komodo, even rewrite all implementations of standard services and replace interfaces and DI. But more practical and easy - use default services.
 
 == Hello, World!
