@@ -10,4 +10,4 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/deploy@morty
 
 echo "Sync with remote folder..."
-rsync -r --delete-after --quiet "${TRAVIS_BUILD_DIR}/komodo-docs/build/dist/" deploy@heapy.io:~/files/heapy.io/komodo/docs/
+rsync -r --verbose "${TRAVIS_BUILD_DIR}/komodo-docs/build/dist/" deploy@heapy.io:~/files/heapy.io/komodo/docs/
