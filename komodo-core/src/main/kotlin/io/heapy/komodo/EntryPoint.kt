@@ -11,3 +11,5 @@ package io.heapy.komodo
 interface EntryPoint<out R> {
     suspend fun run(): R
 }
+
+typealias UnitEntryPoint = EntryPoint<Unit>

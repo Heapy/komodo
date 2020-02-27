@@ -4,7 +4,6 @@ package io.heapy.komodo.di
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.typeOf
@@ -102,17 +101,14 @@ class KomodoBinder : Binder {
     }
 }
 
-suspend inline fun <reified T : Any> createContextAndGet(
-    vararg modules: KClass<out Module>
+suspend fun <T : Any> createContextAndGet(
+    type: KType,
+    modules: List<Module>
 ): T {
     val binder = KomodoBinder()
-    modules.forEach { module -> createModuleInstance(module).getBindings().invoke(binder) }
-    val key = Key(typeOf<T>())
+    modules.forEach { module -> module.getBindings().invoke(binder) }
+    val key = Key(type)
     return binder.createContext().get(key)
-}
-
-fun createModuleInstance(module: KClass<out Module>): Module {
-    return module.createInstance()
 }
 
 suspend fun createType(
@@ -314,6 +310,7 @@ class Test2 : ITest2 {
         println("Test2")
     }
 }
+
 class Test2Provider : Provider<Test2> {
     init {
         println("Test2Provider")
@@ -357,7 +354,8 @@ class TestModule : Module {
 }
 
 suspend fun main() {
-    val testProvider = createContextAndGet<Provider<Test>>(Module1::class, Module2::class, Module3::class)
+    val testProvider = createContextAndGet<Provider<Test>>(typeOf<Provider<Test>>(), listOf(Module1(), Module2(),
+        Module3()))
 
     val test = testProvider.getInstance()
     println(test.t1)
@@ -377,6 +375,10 @@ interface IE2 : IE1
 class IE3 : IE2
 
 suspend fun testDelegation() {
-    val ie1 = createContextAndGet<IE1>(ModuleDelegation::class)
+    val ie1 = createContextAndGet<IE1>(typeOf<IE1>(), listOf(ModuleDelegation()))
     println(ie1)
+}
+
+fun module(builder: ModuleBuilder): ModuleBuilder {
+    return builder
 }

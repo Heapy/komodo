@@ -1,3 +1,5 @@
+import io.heapy.Libs.kotlinReflect
+
 group = "io.heapy.komodo"
 
 plugins {
@@ -8,4 +10,5 @@ plugins {
 dependencies {
     api(project(":komodo-env"))
     api(project(":komodo-di"))
+    implementation(kotlinReflect.dep())
 }

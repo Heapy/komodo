@@ -2,11 +2,54 @@ package io.heapy.komodo
 
 import io.heapy.komodo.di.Module
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
+
+/**
+ * Collects all external dependencies to build instance of [Komodo].
+ */
+@KomodoDsl
+interface KomodoBuilder {
+    @KomodoDsl
+    fun args(args: Array<String>)
+
+    @KomodoDsl
+    fun env(env: Map<String, String>)
+
+    @KomodoDsl
+    fun props(props: Map<String, String>)
+
+    @KomodoDsl
+    fun module(module: KClass<out Module>)
+
+    @KomodoDsl
+    fun module(module: Module)
+}
 
 interface Komodo {
-    fun args(args: Array<String>): Komodo
-    fun env(env: Map<String, String>): Komodo
-    fun props(props: Map<String, String>): Komodo
-    fun module(module: Module): Komodo
-    suspend fun <R> run(entryPoint: KClass<out EntryPoint<R>>): R
+    suspend fun run(type: KType)
+    suspend fun <R> runReturning(type: KType): R
+}
+
+@DslMarker
+annotation class KomodoDsl
+
+@KomodoDsl
+suspend inline fun <reified T : UnitEntryPoint> komodo(
+    builder: KomodoBuilder.() -> Unit
+) {
+    val komodoBuilder = DefaultKomodoBuilder()
+    builder(komodoBuilder)
+    val komodo = komodoBuilder.komodo()
+    komodo.run(typeOf<T>())
+}
+
+@KomodoDsl
+suspend inline fun <reified R> komodoReturning(
+    builder: KomodoBuilder.() -> Unit
+): R {
+    val komodoBuilder = DefaultKomodoBuilder()
+    builder(komodoBuilder)
+    val komodo = komodoBuilder.komodo()
+    return komodo.runReturning(typeOf<R>())
 }
