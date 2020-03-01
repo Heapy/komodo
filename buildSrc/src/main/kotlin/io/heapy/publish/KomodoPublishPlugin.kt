@@ -114,6 +114,7 @@ class KomodoPublishPlugin : Plugin<Project> {
             }
 
             project.extensions.getByType<SigningExtension>().apply {
+                setRequired(false)
                 sign(komodoPublication)
             }
 
