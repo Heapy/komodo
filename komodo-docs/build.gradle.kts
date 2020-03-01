@@ -34,7 +34,8 @@ val asciidoctor by tasks.existing(AsciidoctorTask::class) {
     attributes = mapOf(
         "komodo-version" to version,
         "revnumber" to version,
-        "revdate" to LocalDate.now()
+        "revdate" to LocalDate.now(),
+        "toc" to "left"
     )
 
     setOutputDir(buildDir.resolve("dist").resolve("$version"))
