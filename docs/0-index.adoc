@@ -1,18 +1,69 @@
 :komodo-version: 1.0.0
 = Komodo Documentation
 
+> This documentation describes default Komodo setup.
+You can customize every part of komodo, even rewrite all implementations of standard services and replace interfaces and DI. But more practical and easy - use default services.
+
 image::logo.png[align=center]
 
-> This documentation describes default Komodo setup. You can customize every part of komodo, even rewrite all implementations of standard services and replace interfaces and DI. But more practical and easy - use default services.
+== Links
+
+- https://github.com/heapy/komodo[Github]
+- https://travis-ci.com/Heapy/komodo[Travis CI]
+- https://bintray.com/heapy/heap-dev/komodo/_latestVersion[Latest Dev Build]
 
 == Hello, World!
 
-[source,kotlin]
+[source,kotlin,subs="attributes+"]
 ----
-komodo {
-    module(TestModule1::class)
+// build.gradle.kts
+plugins {
+    kotlin("jvm").version("1.3.61")
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation("io.heapy.komodo:komodo-core:{komodo-version}")
 }
 ----
+
+[source,kotlin]
+----
+// main.kt
+suspend fun main() {
+    komodo<Application> {
+        module {
+            bindConcrete<Service1>()
+            bindConcrete<Service2>()
+        }
+    }
+}
+
+class Application(
+    private val service1: Service1
+) : UnitEntryPoint {
+    override suspend fun run() {
+        service1.run()
+    }
+}
+
+class Service1(private val service2: Service2) {
+    fun run() {
+        service2.hello()
+    }
+}
+
+class Service2 {
+    fun hello() {
+        println("Hello, World!")
+    }
+}
+----
+
+After running that code, you'll see "Hello, World!" in output.
 
 == Configuration
 

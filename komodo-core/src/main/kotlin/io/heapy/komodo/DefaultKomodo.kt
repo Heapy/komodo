@@ -68,6 +68,7 @@ class DefaultKomodo(
         val moduleInstances = modules
             .asSequence()
             .map { module -> createModuleInstance(module) }
+            .plus(moduleInstances)
             .plus(object : Module {
                 override fun getBindings(): ModuleBuilder = {
                     val key = Key(type)
@@ -87,24 +88,28 @@ class DefaultKomodo(
 
 suspend fun main() {
     komodo<Application> {
-        module(K1::class)
-        module(K2::class)
+        module {
+            bindConcrete<Service1>()
+            bindConcrete<Service2>()
+        }
     }
 }
 
-class Application(private val k1C: K1C) : UnitEntryPoint {
+class Application(
+    private val service1: Service1
+) : UnitEntryPoint {
     override suspend fun run() {
-        k1C.run()
+        service1.run()
     }
 }
 
-class K1C(private val k2c: K2C) {
+class Service1(private val service2: Service2) {
     fun run() {
-        k2c.hello()
+        service2.hello()
     }
 }
 
-class K2C {
+class Service2 {
     fun hello() {
         println("Hello, World!")
     }
@@ -112,12 +117,12 @@ class K2C {
 
 class K1 : Module {
     override fun getBindings(): ModuleBuilder = {
-        bindConcrete<K1C>()
+        bindConcrete<Service1>()
     }
 }
 
 class K2 : Module {
     override fun getBindings(): ModuleBuilder = {
-        bindConcrete<K2C>()
+        bindConcrete<Service2>()
     }
 }

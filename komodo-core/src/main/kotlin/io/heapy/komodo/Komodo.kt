@@ -1,6 +1,7 @@
 package io.heapy.komodo
 
 import io.heapy.komodo.di.Module
+import io.heapy.komodo.di.ModuleBuilder
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -42,6 +43,14 @@ suspend inline fun <reified T : UnitEntryPoint> komodo(
     builder(komodoBuilder)
     val komodo = komodoBuilder.komodo()
     komodo.run(typeOf<T>())
+}
+
+fun KomodoBuilder.module(builder: ModuleBuilder) {
+    module(object : Module {
+        override fun getBindings(): ModuleBuilder {
+            return builder
+        }
+    })
 }
 
 @KomodoDsl
