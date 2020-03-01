@@ -10,7 +10,10 @@ dependencies {
     // import a BOM
     implementation(platform("io.heapy.komodo:komodo-bom:{komodo-version}"))
 
-    implementation("io.heapy.komodo:komodo-logging") // no version required, set to {komodo-version} automatically
-    implementation("org.slf4j:slf4j-api") // no version required, set to version that shipped with komodo
+    // no version required, set to {komodo-version} automatically
+    implementation("io.heapy.komodo:komodo-logging")
+
+    // no version required, set to version that shipped with komodo
+    implementation("org.slf4j:slf4j-api")
 }
 ----
