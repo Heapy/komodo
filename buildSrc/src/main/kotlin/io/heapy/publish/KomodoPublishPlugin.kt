@@ -13,7 +13,9 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.plugins.signing.SigningExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import java.util.Date
 
@@ -26,6 +28,7 @@ import java.util.Date
 class KomodoPublishPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         project.defaultRepositories()
+        project.plugins.apply("signing")
         project.plugins.apply("java-library")
         project.plugins.apply("maven-publish")
         project.plugins.apply("com.jfrog.bintray")
@@ -55,9 +58,11 @@ class KomodoPublishPlugin : Plugin<Project> {
         // Move extensions to afterEvaluate phase, since group values
         // not available before evaluation of projects
         project.afterEvaluate {
-            project.extensions.getByType(PublishingExtension::class.java).apply {
+            lateinit var komodoPublication: MavenPublication
+
+            project.extensions.getByType<PublishingExtension>().apply {
                 publications {
-                    create<MavenPublication>("komodo") {
+                    komodoPublication = create<MavenPublication>("komodo") {
                         if (!isBOM) {
                             from(project.components["java"])
                         }
@@ -97,15 +102,24 @@ class KomodoPublishPlugin : Plugin<Project> {
                                 url.set("https://github.com/Heapy/komodo")
                             }
 
+                            issueManagement {
+                                system.set("GitHub")
+                                url.set("https://github.com/heapy/komodo/issues")
+                            }
+
                             addDependencies(isBOM)
                         }
                     }
                 }
             }
 
+            project.extensions.getByType<SigningExtension>().apply {
+                sign(komodoPublication)
+            }
+
             val isDev = project.version.toString().contains("development")
 
-            project.extensions.getByType(BintrayExtension::class.java).apply {
+            project.extensions.getByType<BintrayExtension>().apply {
                 user = System.getenv("BINTRAY_USER")
                 key = System.getenv("BINTRAY_API_KEY")
 
