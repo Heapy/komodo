@@ -34,7 +34,7 @@ class KomodoPublishPlugin : Plugin<Project> {
         project.plugins.apply("com.jfrog.bintray")
         project.plugins.apply("org.jetbrains.dokka")
 
-        val sourcesJar = project.tasks.create("sourcesJar", Jar::class) {
+        val sourcesJar = project.tasks.create<Jar>("sourcesJar") {
             group = "documentation"
             val sourceSets: SourceSetContainer by project
             from(sourceSets["main"].allSource)
@@ -46,7 +46,7 @@ class KomodoPublishPlugin : Plugin<Project> {
             outputDirectory = "${project.buildDir}/dokka"
         }
 
-        val dokkaJar = project.tasks.create("dokkaJar", Jar::class) {
+        val dokkaJar = project.tasks.create<Jar>("dokkaJar") {
             group = "documentation"
             dependsOn(dokka)
             from(dokka.outputDirectory)
