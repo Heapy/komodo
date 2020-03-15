@@ -1,7 +1,7 @@
 package io.heapy
 
 object Libs {
-    const val kotlinVersion = "1.3.61"
+    const val kotlinVersion = "1.3.70"
     val kotlinStdlib = Lib("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", kotlinVersion)
     val kotlinReflect = Lib("org.jetbrains.kotlin", "kotlin-reflect", kotlinVersion)
     val kotlinScriptUtil = Lib("org.jetbrains.kotlin", "kotlin-script-util", kotlinVersion)
