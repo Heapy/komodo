@@ -1,0 +1,10 @@
+=== Komodo Core Concurrent
+
+[source,kotlin]
+----
+dependencies {
+    implementation("io.heapy.komodo:komodo-core-concurrent:{komodo-version}")
+}
+----
+
+Provides `KomodoThreadFactory()` that can be used with different APIs as general implementation of `java.util.concurrent.ThreadFactory`.

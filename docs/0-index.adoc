@@ -95,3 +95,4 @@ include::5-vision.adoc[]
 == Modules
 
 include::../komodo-bom/README.adoc[]
+include::../komodo-core-concurrent/README.adoc[]
