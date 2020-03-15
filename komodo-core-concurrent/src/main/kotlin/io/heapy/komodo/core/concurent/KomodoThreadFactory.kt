@@ -9,9 +9,9 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-class KomodoThreadFactory(
-    private val isDaemon: Boolean = false,
-    private val nameProducer: ThreadNameProducer = { "komodo-$it" }
+private class DefaultKomodoThreadFactory(
+    private val isDaemon: Boolean,
+    private val nameProducer: ThreadNameProducer
 ) : ThreadFactory {
     private val counter = AtomicInteger()
 
@@ -25,4 +25,15 @@ class KomodoThreadFactory(
     }
 }
 
-internal typealias ThreadNameProducer = (counter: Int) -> String
+private typealias ThreadNameProducer = (counter: Int) -> String
+
+/**
+ * Create instance of [ThreadFactory] with predefined configuration.
+ */
+@Suppress("FunctionName")
+public fun KomodoThreadFactory(
+    isDaemon: Boolean = false,
+    nameProducer: ThreadNameProducer = { "komodo-$it" }
+): ThreadFactory {
+    return DefaultKomodoThreadFactory(isDaemon, nameProducer)
+}
