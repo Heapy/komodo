@@ -13,6 +13,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -44,12 +45,23 @@ class KomodoJvmPlugin : Plugin<Project> {
     private fun Project.config() {
         val bytecodeVersion = JavaVersion.VERSION_1_8
 
-        tasks.withType<KotlinCompile> {
+        val commonCompilerArgs = listOf(
+            "-progressive",
+            "-Xopt-in=kotlin.ExperimentalStdlibApi",
+            "-Xopt-in=kotlin.RequiresOptIn"
+        )
+
+        tasks.named<KotlinCompile>("compileTestKotlin") {
             kotlinOptions {
-                freeCompilerArgs = freeCompilerArgs + listOf(
-                    "-progressive",
-                    "-Xuse-experimental=kotlin.Experimental",
-                    "-Xuse-experimental=kotlin.ExperimentalStdlibApi"
+                freeCompilerArgs = freeCompilerArgs + commonCompilerArgs
+                jvmTarget = bytecodeVersion.toString()
+            }
+        }
+
+        tasks.named<KotlinCompile>("compileKotlin") {
+            kotlinOptions {
+                freeCompilerArgs = freeCompilerArgs + commonCompilerArgs + listOf(
+                    "-Xexplicit-api=warning"
                 )
                 jvmTarget = bytecodeVersion.toString()
             }
