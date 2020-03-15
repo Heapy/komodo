@@ -8,5 +8,5 @@ package io.heapy.komodo.experimental
  */
 @MustBeDocumented
 @Retention(value = AnnotationRetention.BINARY)
-@Experimental(level = Experimental.Level.WARNING)
-annotation class ExperimentalApi
+@RequiresOptIn(level = RequiresOptIn.Level.WARNING)
+public annotation class ExperimentalApi
