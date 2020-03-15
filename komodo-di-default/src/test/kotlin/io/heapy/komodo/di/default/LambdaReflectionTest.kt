@@ -6,7 +6,6 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.reflect.jvm.internal.KotlinReflectionInternalError
 import kotlin.reflect.jvm.reflect
 
-
 /**
  * @author Ruslan Ibragimov
  * @since 1.0
