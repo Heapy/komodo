@@ -10,7 +10,7 @@ Project follows [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 - here will be fixes in version 0.0.1
 
 ### Removed
-- what removed in current versiion
+- what removed in current version
 
 ### Updates
 - libraries which updated in current release
