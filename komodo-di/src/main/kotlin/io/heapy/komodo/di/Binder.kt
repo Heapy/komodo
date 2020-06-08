@@ -1,5 +1,3 @@
-@file:Suppress("RedundantVisibilityModifier")
-
 package io.heapy.komodo.di
 
 import kotlin.reflect.KClass
@@ -19,9 +17,9 @@ public interface Module {
     public fun getBindings(): ModuleBuilder
 }
 
-class ContextException(override val message: String) : RuntimeException()
+internal class ContextException(override val message: String) : RuntimeException()
 
-typealias ModuleBuilder = Binder.() -> Unit
+public typealias ModuleBuilder = Binder.() -> Unit
 
 /**
  * Binder used to collect all [BeanDefinition]s and create context later.
@@ -29,11 +27,11 @@ typealias ModuleBuilder = Binder.() -> Unit
  * @author Ruslan Ibragimov
  * @since 0.1.0
  */
-interface Binder {
-    fun contribute(definition: BeanDefinition<*, *>)
+public interface Binder {
+    public fun contribute(definition: BeanDefinition<*, *>)
 }
 
-class BeanDefinition<I : Any, C : I>(
+public class BeanDefinition<I : Any, C : I>(
     internal val classKey: Key,
     internal val interfaceKey: Key,
     internal val isProvider: Boolean = false,
@@ -41,26 +39,26 @@ class BeanDefinition<I : Any, C : I>(
     internal var provider: Provider<*>? = null
 )
 
-class BeanDefinitionBak<I : Any, C : I>(
+public class BeanDefinitionBak<I : Any, C : I>(
     internal val list: Boolean = false,
     internal var wrapper: KType? = null
 ) {
     internal var initMethod: (C.() -> Any)? = null
 
     @ModuleDSL
-    fun initMethod(function: C.() -> Any): BeanDefinitionBak<I, C> {
+    public fun initMethod(function: C.() -> Any): BeanDefinitionBak<I, C> {
         initMethod = function
         return this
     }
 
-    fun wrap(wrapper: I): BeanDefinitionBak<I, C> {
+    public fun wrap(wrapper: I): BeanDefinitionBak<I, C> {
         return this
     }
 }
 
-interface Context {
-    suspend fun <T : Any> get(key: Key): T
-    suspend fun <T : Any> getOrNull(key: Key): T? {
+public interface Context {
+    public suspend fun <T : Any> get(key: Key): T
+    public suspend fun <T : Any> getOrNull(key: Key): T? {
         return try {
             get(key)
         } catch (e: Exception) {
@@ -69,7 +67,7 @@ interface Context {
     }
 }
 
-class KomodoContext(
+public class KomodoContext(
     private val definitions: Map<Key, BeanDefinition<*, *>>
 ) : Context {
     override suspend fun <T : Any> get(key: Key): T {
@@ -89,19 +87,19 @@ class KomodoContext(
     }
 }
 
-class KomodoBinder : Binder {
+public class KomodoBinder : Binder {
     private val definitions = mutableMapOf<Key, BeanDefinition<*, *>>()
 
     override fun contribute(definition: BeanDefinition<*, *>) {
         definitions[definition.interfaceKey] = definition
     }
 
-    fun createContext(): Context {
+    public fun createContext(): Context {
         return KomodoContext(definitions.toMap())
     }
 }
 
-suspend fun <T : Any> createContextAndGet(
+public suspend fun <T : Any> createContextAndGet(
     type: KType,
     modules: List<Module>
 ): T {
@@ -111,7 +109,7 @@ suspend fun <T : Any> createContextAndGet(
     return binder.createContext().get(key)
 }
 
-suspend fun createType(
+public suspend fun createType(
     key: Key,
     definitions: Map<Key, BeanDefinition<*, *>>,
     stack: MutableList<Key> = mutableListOf()
@@ -165,7 +163,7 @@ suspend fun createType(
     }
 }
 
-fun printCircularDependencyGraph(
+public fun printCircularDependencyGraph(
     key: Key,
     stack: MutableList<Key>,
     definitions: Map<Key, BeanDefinition<*, *>>
@@ -194,17 +192,17 @@ fun printCircularDependencyGraph(
     }
 }
 
-data class Key(
+public data class Key(
     val type: KType,
     val qualifier: Qualifier = DefaultQualifier
 )
 
-interface Qualifier
+public interface Qualifier
 
-object DefaultQualifier : Qualifier
+public object DefaultQualifier : Qualifier
 
 @DslMarker
-annotation class ModuleDSL
+public annotation class ModuleDSL
 
 /**
  * We need Provider interface until issue with reflection for lambda parameters not resolved.
@@ -212,10 +210,10 @@ annotation class ModuleDSL
  * Than we can use lambdas instead.
  *
  * @author Ruslan Ibragimov
- * @since 1.0
+ * @since 1.0.0
  */
-interface Provider<out T> {
-    suspend fun getInstance(): T
+public interface Provider<out T> {
+    public suspend fun getInstance(): T
 }
 
 // 3. Support override of dependencies (through optional wrapping?, i.e. override particular case of decoration)
@@ -254,7 +252,7 @@ interface Provider<out T> {
 // get TransactionLog -> MySqlDatabaseTransactionLog
 
 @ModuleDSL
-inline fun <reified C : Any> Binder.bindConcrete(): BeanDefinition<C, C> {
+public inline fun <reified C : Any> Binder.bindConcrete(): BeanDefinition<C, C> {
     val classKey = Key(typeOf<C>())
     return BeanDefinition<C, C>(
         classKey = classKey,
@@ -265,7 +263,7 @@ inline fun <reified C : Any> Binder.bindConcrete(): BeanDefinition<C, C> {
 }
 
 @ModuleDSL
-inline fun <reified I : Any, reified C : I> Binder.bind(): BeanDefinition<I, C> {
+public inline fun <reified I : Any, reified C : I> Binder.bind(): BeanDefinition<I, C> {
     return BeanDefinition<I, C>(
         classKey = Key(typeOf<C>()),
         interfaceKey = Key(typeOf<I>())
@@ -275,7 +273,7 @@ inline fun <reified I : Any, reified C : I> Binder.bind(): BeanDefinition<I, C> 
 }
 
 @ModuleDSL
-inline fun <reified I : Any, reified P : Provider<I>> Binder.provide(): BeanDefinition<P, P> {
+public inline fun <reified I : Any, reified P : Provider<I>> Binder.provide(): BeanDefinition<P, P> {
     return BeanDefinition<P, P>(
         classKey = Key(typeOf<P>()),
         interfaceKey = Key(typeOf<I>()),
@@ -286,7 +284,7 @@ inline fun <reified I : Any, reified P : Provider<I>> Binder.provide(): BeanDefi
 }
 
 @ModuleDSL
-inline fun <reified R : Any> Binder.createList() {
+public inline fun <reified R : Any> Binder.createList() {
 //    contribute(BeanDefinition<R, R>(
 //        key = Key(typeOf<List<R>>()),
 //        iface = R::class,
@@ -294,24 +292,24 @@ inline fun <reified R : Any> Binder.createList() {
 //    ))
 }
 
-interface ITest1
-class Test1(val test2: Test2) : ITest1 {
+public interface ITest1
+public class Test1(public val test2: Test2) : ITest1 {
     init {
         println("Test1")
     }
 
-    fun start() {}
-    fun start1(): Int = 1
+    public fun start() {}
+    public fun start1(): Int = 1
 }
 
-interface ITest2
-class Test2 : ITest2 {
+public interface ITest2
+public class Test2 : ITest2 {
     init {
         println("Test2")
     }
 }
 
-class Test2Provider : Provider<Test2> {
+public class Test2Provider : Provider<Test2> {
     init {
         println("Test2Provider")
     }
@@ -321,15 +319,15 @@ class Test2Provider : Provider<Test2> {
     }
 }
 
-class Test3
+public class Test3
 
-class Test(val t1: ITest1, val test2: Test2) {
+public class Test(public val t1: ITest1, public val test2: Test2) {
     init {
         println("Test")
     }
 }
 
-class Module1 : Module {
+public class Module1 : Module {
     override fun getBindings(): ModuleBuilder = {
         bind<ITest1, Test1>()
 //        bindConcrete<Test2>()
@@ -337,23 +335,23 @@ class Module1 : Module {
     }
 }
 
-class Module2 : Module {
+public class Module2 : Module {
     override fun getBindings(): ModuleBuilder = {}
 }
 
-class Module3 : Module {
+public class Module3 : Module {
     override fun getBindings(): ModuleBuilder = {
         bindConcrete<Test>()
     }
 }
 
-class TestModule : Module {
+public class TestModule : Module {
     override fun getBindings(): ModuleBuilder = {
         bindConcrete<Test3>()
     }
 }
 
-suspend fun main() {
+public suspend fun main() {
     val testProvider = createContextAndGet<Provider<Test>>(typeOf<Provider<Test>>(), listOf(Module1(), Module2(),
         Module3()))
 
@@ -363,22 +361,22 @@ suspend fun main() {
     println(test.test2)
 }
 
-class ModuleDelegation : Module {
+public class ModuleDelegation : Module {
     override fun getBindings(): ModuleBuilder = {
         bind<IE1, IE2>()
         bind<IE2, IE3>()
     }
 }
 
-interface IE1
-interface IE2 : IE1
-class IE3 : IE2
+public interface IE1
+public interface IE2 : IE1
+public class IE3 : IE2
 
-suspend fun testDelegation() {
+public suspend fun testDelegation() {
     val ie1 = createContextAndGet<IE1>(typeOf<IE1>(), listOf(ModuleDelegation()))
     println(ie1)
 }
 
-fun module(builder: ModuleBuilder): ModuleBuilder {
+public fun module(builder: ModuleBuilder): ModuleBuilder {
     return builder
 }

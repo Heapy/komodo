@@ -1,7 +1,7 @@
 package io.heapy
 
 object Libs {
-    const val kotlinVersion = "1.3.70"
+    val kotlinVersion = KotlinVersion.CURRENT.toString()
     val kotlinStdlib = Lib("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", kotlinVersion)
     val kotlinReflect = Lib("org.jetbrains.kotlin", "kotlin-reflect", kotlinVersion)
     val kotlinScriptUtil = Lib("org.jetbrains.kotlin", "kotlin-script-util", kotlinVersion)
@@ -17,14 +17,14 @@ object Libs {
     const val logbackVersion = "1.3.0-alpha5"
     val logbackClassic = Lib("ch.qos.logback", "logback-classic", logbackVersion)
 
-    const val junitVersion = "5.6.0"
+    const val junitVersion = "5.6.2"
     val jupiterApi = Lib("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     val jupiterEngine = Lib("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 
-    const val junitPlatformVersion = "1.6.0"
+    const val junitPlatformVersion = "1.6.2"
     val junitPlatformLauncher = Lib("org.junit.platform", "junit-platform-launcher", junitPlatformVersion)
 
-    const val mockkVersion = "1.9.3"
+    const val mockkVersion = "1.10.0"
     val mockk = Lib("io.mockk", "mockk", mockkVersion)
 
     const val undertowVersion = "2.0.29.Final"
@@ -44,33 +44,70 @@ object Libs {
     val jacksonKotlin = Lib("com.fasterxml.jackson.module", "jackson-module-kotlin", jacksonVersion)
     val jacksonXml = Lib("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", jacksonVersion)
 
-    val ALL: List<Lib> = listOf(
-        kotlinStdlib,
-        kotlinReflect,
-        kotlinScriptUtil,
-        kotlinCompilerEmbeddable,
-        kotlinxCoroutines,
-        slf4jApi,
-        slf4jSimple,
-        logbackClassic,
-        jupiterApi,
-        jupiterEngine,
-        junitPlatformLauncher,
-        mockk,
-        undertow,
-        httpasyncclient,
-        hikariCP,
-        ktorClientApache,
-        ktorClientJackson,
-        jacksonKotlin,
-        jacksonXml
-    )
+    val libraries: List<Lib>
+        get() = listOf(
+            kotlinStdlib,
+            kotlinReflect,
+            kotlinScriptUtil,
+            kotlinCompilerEmbeddable,
+            kotlinxCoroutines,
+            slf4jApi,
+            slf4jSimple,
+            logbackClassic,
+            jupiterApi,
+            jupiterEngine,
+            junitPlatformLauncher,
+            mockk,
+            undertow,
+            httpasyncclient,
+            hikariCP,
+            ktorClientApache,
+            ktorClientJackson,
+            jacksonKotlin,
+            jacksonXml
+        )
+
+    /**
+     * Get all known komodo libraries
+     */
+    fun getKomodoLibraries(komodoVersion: String): List<Lib> {
+        fun komodoLib(
+            group: String,
+            artifact: String,
+            publish: Boolean
+        ): Lib {
+            return Lib(
+                group = group,
+                artifact = artifact,
+                version = komodoVersion,
+                publish = publish
+            )
+        }
+
+        return listOf(
+            komodoLib("io.heapy.komodo", "komodo", true),
+            komodoLib("io.heapy.komodo", "komodo-config", true),
+            komodoLib("io.heapy.komodo", "komodo-config-dotenv", true),
+            komodoLib("io.heapy.komodo", "komodo-core-beans", true),
+            komodoLib("io.heapy.komodo", "komodo-core-cli", true),
+            komodoLib("io.heapy.komodo", "komodo-core-command", true),
+            komodoLib("io.heapy.komodo", "komodo-core-concurrent", true),
+            komodoLib("io.heapy.komodo", "komodo-core-coroutines", true),
+            komodoLib("io.heapy.komodo", "komodo-di", true),
+            komodoLib("io.heapy.komodo.utils", "komodo-deferrify", true),
+            komodoLib("io.heapy.komodo", "komodo-root", false),
+            komodoLib("io.heapy.komodo", "komodo-bom", false),
+            komodoLib("io.heapy.komodo", "komodo-docs", false),
+            komodoLib("io.heapy.komodo", "komodo-logging", false)
+        )
+    }
 }
 
 data class Lib(
     val group: String,
     val artifact: String,
-    val version: String
+    val version: String,
+    val publish: Boolean = true
 ) {
     fun dep(): String = "$group:$artifact:$version"
 }

@@ -1,7 +1,6 @@
 dependencies {
-    api(project(":komodo-env"))
     api(project(":komodo-scripting"))
-    api(project(":komodo-core"))
+    api(project(":komodo"))
 
     // kotlin & coroutines
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

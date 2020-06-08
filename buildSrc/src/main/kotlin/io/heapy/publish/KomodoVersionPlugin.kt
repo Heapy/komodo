@@ -22,8 +22,8 @@ class KomodoVersionPlugin : Plugin<Project> {
             // Branch not master, and it's not PR
             // Branch master, and it's PR
 
-            (project.subprojects + project).forEach {
-                it.version = "$currentVersion-development-$buildNumber"
+            project.allprojects.forEach {
+                it.version = "$currentVersion-development+${buildNumber.padStart(6, '0')}"
             }
         }
 

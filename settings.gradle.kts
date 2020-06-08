@@ -1,4 +1,4 @@
-rootProject.name = "komodo"
+rootProject.name = "komodo-root"
 
 fun modules(vararg paths: String) {
     paths.forEach { path ->
@@ -9,16 +9,17 @@ fun modules(vararg paths: String) {
 }
 
 modules(
+    "komodo",
     "komodo-bom",
     "komodo-config",
     "komodo-config-dotenv",
-    "komodo-core",
-    "komodo-core-coroutines",
-    "komodo-core-concurrent",
     "komodo-core-beans",
-    "komodo-docs",
+    "komodo-core-cli",
+    "komodo-core-command",
+    "komodo-core-concurrent",
+    "komodo-core-coroutines",
     "komodo-di",
-    "komodo-di-default",
-    "komodo-env",
-    "komodo-logging"
+    "komodo-docs",
+    "komodo-logging",
+    "komodo-utils/komodo-deferrify"
 )

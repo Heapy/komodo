@@ -4,10 +4,13 @@ import io.heapy.Extensions.defaultRepositories
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.getValue
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.registering
+import org.gradle.testing.jacoco.plugins.JacocoPlugin
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
 import org.gradle.testing.jacoco.tasks.JacocoMerge
 import org.gradle.testing.jacoco.tasks.JacocoReport
@@ -25,9 +28,9 @@ class RootCoveragePlugin : Plugin<Project> {
     }
 
     private fun Project.config() {
-        plugins.apply("jacoco")
+        pluginManager.apply(JacocoPlugin::class)
 
-        extensions.getByType(JacocoPluginExtension::class.java).apply {
+        extensions.getByType<JacocoPluginExtension>().apply {
             toolVersion = "0.8.5"
         }
 

@@ -1,0 +1,19 @@
+=== Komodo Deferrify
+
+[source,kotlin,subs="attributes+"]
+----
+dependencies {
+    implementation("io.heapy.komodo.utils:komodo-deferrify:{komodo-version}")
+}
+----
+
+Converts `java.util.concurrent.Future` to `kotlinx.coroutines.Deferred` using single thread and polling:
+
+[source,kotlin]
+----
+val future: Future<Response> = apiCall()
+
+val deferred: Deferred<T> = future.toDeferred()
+----
+
+

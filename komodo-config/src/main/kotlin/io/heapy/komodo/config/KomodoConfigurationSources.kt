@@ -8,6 +8,6 @@ import io.heapy.komodo.file.ByteStreamProvider
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-interface KomodoConfigurationSources {
-    fun getSources(): List<ByteStreamProvider>
+public interface KomodoConfigurationSources {
+    public fun getSources(): List<ByteStreamProvider>
 }

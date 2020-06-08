@@ -2,7 +2,10 @@ package io.heapy.publish
 
 import com.jfrog.bintray.gradle.BintrayExtension
 import io.heapy.Extensions.defaultRepositories
-import io.heapy.Libs.ALL
+import io.heapy.Libs.getKomodoLibraries
+import io.heapy.Lib
+import io.heapy.Libs.libraries
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -107,7 +110,7 @@ class KomodoPublishPlugin : Plugin<Project> {
                                 url.set("https://github.com/heapy/komodo/issues")
                             }
 
-                            addDependencies(isBOM)
+                            addDependencies(isBOM, project)
                         }
                     }
                 }
@@ -144,8 +147,14 @@ class KomodoPublishPlugin : Plugin<Project> {
         }
     }
 
-    private fun MavenPom.addDependencies(isBOM: Boolean) {
+    private fun MavenPom.addDependencies(isBOM: Boolean, project: Project) {
         if (isBOM) {
+            val komodoLibraries = getKomodoLibraries(project.version.toString())
+
+            // Validate that manual change to komodoLibs was made,
+            // and Lin either published, or not
+            project.validateKomodoLibs(komodoLibraries)
+
             packaging = "pom"
 
             withXml {
@@ -153,7 +162,8 @@ class KomodoPublishPlugin : Plugin<Project> {
                     .appendNode("dependencyManagement")
                     .appendNode("dependencies")
 
-                ALL.forEach {
+                val komodoLibrariesPublish = komodoLibraries.filter { it.publish }
+                (libraries + komodoLibrariesPublish).forEach {
                     val dependency = dependencies.appendNode("dependency")
                     dependency.appendNode("groupId", it.group)
                     dependency.appendNode("artifactId", it.artifact)
@@ -162,4 +172,19 @@ class KomodoPublishPlugin : Plugin<Project> {
             }
         }
     }
+
+    private fun Project.validateKomodoLibs(libs: List<Lib>) {
+        val definedLibs = libs.map { it.artifact }
+        val knownLibs = rootProject.allprojects.map { it.name }
+
+        val unknown = knownLibs.subtract(definedLibs)
+
+        if (unknown.isNotEmpty()) {
+            throw KomodoPublishException("Unknown libraries found: $unknown")
+        }
+    }
+
+    private class KomodoPublishException(
+        override val message: String
+    ) : GradleException()
 }

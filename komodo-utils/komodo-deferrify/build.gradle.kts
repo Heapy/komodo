@@ -1,4 +1,4 @@
-group = "io.heapy.komodo"
+group = "io.heapy.komodo.utils"
 
 plugins {
     id("io.heapy.build.jvm")
@@ -6,5 +6,4 @@ plugins {
 }
 
 dependencies {
-    api(project(":komodo"))
 }

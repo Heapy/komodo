@@ -6,6 +6,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":komodo-core"))
+    implementation(project(":komodo"))
 }
 

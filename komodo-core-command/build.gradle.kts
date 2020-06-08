@@ -6,5 +6,5 @@ plugins {
 }
 
 dependencies {
-    api(project(":komodo"))
+    implementation(project(":komodo"))
 }

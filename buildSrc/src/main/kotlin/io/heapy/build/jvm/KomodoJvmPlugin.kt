@@ -12,10 +12,14 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.testing.Test
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
+import org.gradle.testing.jacoco.plugins.JacocoPlugin
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
@@ -25,16 +29,16 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * @since 1.0
  */
 class KomodoJvmPlugin : Plugin<Project> {
-    override fun apply(project: Project) {
-        project.defaultRepositories()
-        project.coverage()
-        project.kotlin()
-        project.test()
-        project.config()
+    override fun apply(project: Project) = with(project) {
+        defaultRepositories()
+        coverage()
+        kotlin()
+        test()
+        config()
     }
 
     private fun Project.kotlin() {
-        plugins.apply("org.jetbrains.kotlin.jvm")
+        pluginManager.apply(KotlinPluginWrapper::class)
 
         dependencies {
             add("implementation", kotlinStdlib.dep())
@@ -67,7 +71,7 @@ class KomodoJvmPlugin : Plugin<Project> {
             }
         }
 
-        extensions.getByType(JavaPluginExtension::class.java).apply {
+        extensions.getByType<JavaPluginExtension>().apply {
             sourceCompatibility = bytecodeVersion
             targetCompatibility = bytecodeVersion
         }
@@ -77,7 +81,7 @@ class KomodoJvmPlugin : Plugin<Project> {
         tasks.withType<Test> {
             useJUnitPlatform()
 
-            extensions.getByType(JacocoTaskExtension::class.java).apply {
+            extensions.getByType<JacocoTaskExtension>().apply {
                 // Val cannot be reassigned
                 // destinationFile = file("$buildDir/jacoco/module.exec")
                 setDestinationFile(file("$buildDir/jacoco/module.exec"))
@@ -93,6 +97,6 @@ class KomodoJvmPlugin : Plugin<Project> {
     }
 
     private fun Project.coverage() {
-        plugins.apply("jacoco")
+        pluginManager.apply(JacocoPlugin::class)
     }
 }

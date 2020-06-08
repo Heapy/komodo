@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
  * Number of tests to test DI
  *
  * @author Ruslan Ibragimov
- * @since 1.0
+ * @since 1.0.0
  */
 class ContextTest {
 

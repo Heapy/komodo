@@ -1,3 +1,3 @@
 dependencies {
-    compile(project(":komodo-core"))
+    compile(project(":komodo"))
 }

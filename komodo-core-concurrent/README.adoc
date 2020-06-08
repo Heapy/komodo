@@ -1,6 +1,6 @@
 === Komodo Core Concurrent
 
-[source,kotlin]
+[source,kotlin,subs="attributes+"]
 ----
 dependencies {
     implementation("io.heapy.komodo:komodo-core-concurrent:{komodo-version}")

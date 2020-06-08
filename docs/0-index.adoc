@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.heapy.komodo:komodo-core:{komodo-version}")
+    implementation("io.heapy.komodo:komodo:{komodo-version}")
 }
 ----
 
@@ -96,3 +96,4 @@ include::5-vision.adoc[]
 
 include::../komodo-bom/README.adoc[]
 include::../komodo-core-concurrent/README.adoc[]
+include::../komodo-utils/komodo-deferrify/README.adoc[]
