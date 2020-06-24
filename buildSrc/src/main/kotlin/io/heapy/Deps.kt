@@ -1,14 +1,18 @@
 package io.heapy
 
+import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
+import java.util.*
+
 object Libs {
-    val kotlinVersion = KotlinVersion.CURRENT.toString()
+    val kotlinVersion = kotlinPluginVersion().also { println("Kotlin Version: $it") }
     val kotlinStdlib = Lib("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", kotlinVersion)
     val kotlinReflect = Lib("org.jetbrains.kotlin", "kotlin-reflect", kotlinVersion)
     val kotlinScriptUtil = Lib("org.jetbrains.kotlin", "kotlin-script-util", kotlinVersion)
     val kotlinCompilerEmbeddable = Lib("org.jetbrains.kotlin", "kotlin-compiler-embeddable", kotlinVersion)
 
-    const val kotlinxCoroutinesVersion = "1.3.3"
+    const val kotlinxCoroutinesVersion = "1.3.7"
     val kotlinxCoroutines = Lib("org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8", kotlinxCoroutinesVersion)
+    val kotlinxCoroutinesTest = Lib("org.jetbrains.kotlinx", "kotlinx-coroutines-test", kotlinxCoroutinesVersion)
 
     const val slf4jVersion = "2.0.0-alpha1"
     val slf4jApi = Lib("org.slf4j", "slf4j-api", slf4jVersion)
@@ -27,20 +31,20 @@ object Libs {
     const val mockkVersion = "1.10.0"
     val mockk = Lib("io.mockk", "mockk", mockkVersion)
 
-    const val undertowVersion = "2.0.29.Final"
+    const val undertowVersion = "2.1.3.Final"
     val undertow = Lib("io.undertow", "undertow-core", undertowVersion)
 
     const val apacheHttpClientVersion = "4.1.4"
     val httpasyncclient = Lib("org.apache.httpcomponents", "httpasyncclient", apacheHttpClientVersion)
 
-    const val hikariCPVersion = "3.4.2"
+    const val hikariCPVersion = "3.4.5"
     val hikariCP = Lib("com.zaxxer", "HikariCP", hikariCPVersion)
 
     const val ktorVersion = "1.3.1"
     val ktorClientApache = Lib("io.ktor", "ktor-client-apache", ktorVersion)
     val ktorClientJackson = Lib("io.ktor", "ktor-client-jackson", ktorVersion)
 
-    const val jacksonVersion = "2.10.2"
+    const val jacksonVersion = "2.11.0"
     val jacksonKotlin = Lib("com.fasterxml.jackson.module", "jackson-module-kotlin", jacksonVersion)
     val jacksonXml = Lib("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", jacksonVersion)
 
@@ -51,6 +55,7 @@ object Libs {
             kotlinScriptUtil,
             kotlinCompilerEmbeddable,
             kotlinxCoroutines,
+            kotlinxCoroutinesTest,
             slf4jApi,
             slf4jSimple,
             logbackClassic,
@@ -110,4 +115,15 @@ data class Lib(
     val publish: Boolean = true
 ) {
     fun dep(): String = "$group:$artifact:$version"
+}
+
+private fun kotlinPluginVersion(): String {
+    return KotlinPluginWrapper::class.java.classLoader
+        .getResource("project.properties")!!
+        .openStream().use { propsStream ->
+            Properties().let {
+                it.load(propsStream)
+                it.getProperty("project.version")
+            }
+        }
 }

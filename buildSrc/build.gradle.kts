@@ -12,6 +12,7 @@ repositories {
     when {
         kotlinVersion.contains("dev") -> maven { url = uri("https://dl.bintray.com/kotlin/kotlin-dev/") }
         kotlinVersion.contains("eap") -> maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap/") }
+        kotlinVersion.contains("-M") -> maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap/") }
     }
 }
 

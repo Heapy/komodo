@@ -6,17 +6,6 @@ import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.typeOf
 
-/**
- * Interface for defining user modules.
- * Usually you likely may use [module] function instead.
- *
- * @author Ruslan Ibragimov
- * @since 0.1.0
- */
-public interface Module {
-    public fun getBindings(): ModuleBuilder
-}
-
 internal class ContextException(override val message: String) : RuntimeException()
 
 public typealias ModuleBuilder = Binder.() -> Unit
@@ -28,10 +17,11 @@ public typealias ModuleBuilder = Binder.() -> Unit
  * @since 0.1.0
  */
 public interface Binder {
-    public fun contribute(definition: BeanDefinition<*, *>)
+    public fun dependency(module: ModuleBuilder)
+    public fun contribute(definition: BeanDefinition)
 }
 
-public class BeanDefinition<I : Any, C : I>(
+public class BeanDefinition(
     internal val classKey: Key,
     internal val interfaceKey: Key,
     internal val isProvider: Boolean = false,
@@ -56,6 +46,13 @@ public class BeanDefinitionBak<I : Any, C : I>(
     }
 }
 
+public inline class GenericType<T : Any>(
+    public val actual: KType
+)
+public inline fun <reified T : Any> type(): GenericType<T> {
+    return GenericType(typeOf<T>())
+}
+
 public interface Context {
     public suspend fun <T : Any> get(key: Key): T
     public suspend fun <T : Any> getOrNull(key: Key): T? {
@@ -68,7 +65,7 @@ public interface Context {
 }
 
 public class KomodoContext(
-    private val definitions: Map<Key, BeanDefinition<*, *>>
+    private val definitions: Map<Key, BeanDefinition>
 ) : Context {
     override suspend fun <T : Any> get(key: Key): T {
         return if (key.type.isSubtypeOf(typeOf<Provider<*>>())) {
@@ -88,9 +85,12 @@ public class KomodoContext(
 }
 
 public class KomodoBinder : Binder {
-    private val definitions = mutableMapOf<Key, BeanDefinition<*, *>>()
+    private val definitions = mutableMapOf<Key, BeanDefinition>()
+    override fun dependency(module: ModuleBuilder) {
+        module(this)
+    }
 
-    override fun contribute(definition: BeanDefinition<*, *>) {
+    override fun contribute(definition: BeanDefinition) {
         definitions[definition.interfaceKey] = definition
     }
 
@@ -100,18 +100,18 @@ public class KomodoBinder : Binder {
 }
 
 public suspend fun <T : Any> createContextAndGet(
-    type: KType,
-    modules: List<Module>
+    type: GenericType<T>,
+    modules: List<ModuleBuilder>
 ): T {
     val binder = KomodoBinder()
-    modules.forEach { module -> module.getBindings().invoke(binder) }
-    val key = Key(type)
+    modules.forEach { module -> module.invoke(binder) }
+    val key = Key(type.actual)
     return binder.createContext().get(key)
 }
 
 public suspend fun createType(
     key: Key,
-    definitions: Map<Key, BeanDefinition<*, *>>,
+    definitions: Map<Key, BeanDefinition>,
     stack: MutableList<Key> = mutableListOf()
 ): Any? {
     if (stack.contains(key)) {
@@ -166,7 +166,7 @@ public suspend fun createType(
 public fun printCircularDependencyGraph(
     key: Key,
     stack: MutableList<Key>,
-    definitions: Map<Key, BeanDefinition<*, *>>
+    definitions: Map<Key, BeanDefinition>
 ): String {
     return buildString {
         appendln()
@@ -252,9 +252,15 @@ public interface Provider<out T> {
 // get TransactionLog -> MySqlDatabaseTransactionLog
 
 @ModuleDSL
-public inline fun <reified C : Any> Binder.bindConcrete(): BeanDefinition<C, C> {
+public fun module(builder: ModuleBuilder): ModuleBuilder {
+    println(builder::class.java.name)
+    return builder
+}
+
+@ModuleDSL
+public inline fun <reified C : Any> Binder.bindConcrete(): BeanDefinition {
     val classKey = Key(typeOf<C>())
-    return BeanDefinition<C, C>(
+    return BeanDefinition(
         classKey = classKey,
         interfaceKey = classKey
     ).also {
@@ -263,8 +269,8 @@ public inline fun <reified C : Any> Binder.bindConcrete(): BeanDefinition<C, C> 
 }
 
 @ModuleDSL
-public inline fun <reified I : Any, reified C : I> Binder.bind(): BeanDefinition<I, C> {
-    return BeanDefinition<I, C>(
+public inline fun <reified I : Any, reified C : I> Binder.bind(): BeanDefinition {
+    return BeanDefinition(
         classKey = Key(typeOf<C>()),
         interfaceKey = Key(typeOf<I>())
     ).also {
@@ -273,8 +279,8 @@ public inline fun <reified I : Any, reified C : I> Binder.bind(): BeanDefinition
 }
 
 @ModuleDSL
-public inline fun <reified I : Any, reified P : Provider<I>> Binder.provide(): BeanDefinition<P, P> {
-    return BeanDefinition<P, P>(
+public inline fun <reified I : Any, reified P : Provider<I>> Binder.provide(): BeanDefinition {
+    return BeanDefinition(
         classKey = Key(typeOf<P>()),
         interfaceKey = Key(typeOf<I>()),
         isProvider = true
@@ -290,93 +296,4 @@ public inline fun <reified R : Any> Binder.createList() {
 //        iface = R::class,
 //        list = true
 //    ))
-}
-
-public interface ITest1
-public class Test1(public val test2: Test2) : ITest1 {
-    init {
-        println("Test1")
-    }
-
-    public fun start() {}
-    public fun start1(): Int = 1
-}
-
-public interface ITest2
-public class Test2 : ITest2 {
-    init {
-        println("Test2")
-    }
-}
-
-public class Test2Provider : Provider<Test2> {
-    init {
-        println("Test2Provider")
-    }
-
-    override suspend fun getInstance(): Test2 {
-        return Test2()
-    }
-}
-
-public class Test3
-
-public class Test(public val t1: ITest1, public val test2: Test2) {
-    init {
-        println("Test")
-    }
-}
-
-public class Module1 : Module {
-    override fun getBindings(): ModuleBuilder = {
-        bind<ITest1, Test1>()
-//        bindConcrete<Test2>()
-        provide<Test2, Test2Provider>()
-    }
-}
-
-public class Module2 : Module {
-    override fun getBindings(): ModuleBuilder = {}
-}
-
-public class Module3 : Module {
-    override fun getBindings(): ModuleBuilder = {
-        bindConcrete<Test>()
-    }
-}
-
-public class TestModule : Module {
-    override fun getBindings(): ModuleBuilder = {
-        bindConcrete<Test3>()
-    }
-}
-
-public suspend fun main() {
-    val testProvider = createContextAndGet<Provider<Test>>(typeOf<Provider<Test>>(), listOf(Module1(), Module2(),
-        Module3()))
-
-    val test = testProvider.getInstance()
-    println(test.t1)
-    println((test.t1 as Test1).test2)
-    println(test.test2)
-}
-
-public class ModuleDelegation : Module {
-    override fun getBindings(): ModuleBuilder = {
-        bind<IE1, IE2>()
-        bind<IE2, IE3>()
-    }
-}
-
-public interface IE1
-public interface IE2 : IE1
-public class IE3 : IE2
-
-public suspend fun testDelegation() {
-    val ie1 = createContextAndGet<IE1>(typeOf<IE1>(), listOf(ModuleDelegation()))
-    println(ie1)
-}
-
-public fun module(builder: ModuleBuilder): ModuleBuilder {
-    return builder
 }

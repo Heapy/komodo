@@ -5,6 +5,7 @@ import io.heapy.Libs.jupiterApi
 import io.heapy.Libs.jupiterEngine
 import io.heapy.Libs.kotlinStdlib
 import io.heapy.Libs.kotlinxCoroutines
+import io.heapy.Libs.kotlinxCoroutinesTest
 import io.heapy.Libs.mockk
 import io.heapy.Extensions.defaultRepositories
 import org.gradle.api.JavaVersion
@@ -57,7 +58,9 @@ class KomodoJvmPlugin : Plugin<Project> {
 
         tasks.named<KotlinCompile>("compileTestKotlin") {
             kotlinOptions {
-                freeCompilerArgs = freeCompilerArgs + commonCompilerArgs
+                freeCompilerArgs = freeCompilerArgs + commonCompilerArgs + listOf(
+                    "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+                )
                 jvmTarget = bytecodeVersion.toString()
             }
         }
@@ -89,6 +92,7 @@ class KomodoJvmPlugin : Plugin<Project> {
         }
 
         dependencies {
+            add("testImplementation", kotlinxCoroutinesTest.dep())
             add("testImplementation", mockk.dep())
             add("testImplementation", jupiterApi.dep())
             add("testRuntimeOnly", jupiterEngine.dep())

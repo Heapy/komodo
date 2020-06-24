@@ -8,8 +8,15 @@ package io.heapy.komodo
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-interface EntryPoint<out R> {
-    suspend fun run(): R
+public interface EntryPoint<out R> {
+    public suspend fun run(): R
 }
 
-typealias UnitEntryPoint = EntryPoint<Unit>
+/**
+ * Entry point which doesn't return any values.
+ * Useful for webservers.
+ *
+ * @author Ruslan Ibragimov
+ * @since 1.0
+ */
+public typealias UnitEntryPoint = EntryPoint<Unit>

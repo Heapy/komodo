@@ -1,64 +1,43 @@
 package io.heapy.komodo
 
-import io.heapy.komodo.di.Module
 import io.heapy.komodo.di.ModuleBuilder
-import kotlin.reflect.KClass
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
+import io.heapy.komodo.di.type
 
 /**
  * Collects all external dependencies to build instance of [Komodo].
  */
 @KomodoDsl
-interface KomodoBuilder {
+public interface KomodoBuilder {
     @KomodoDsl
-    fun args(args: Array<String>)
+    public fun args(args: Array<String>)
 
     @KomodoDsl
-    fun env(env: Map<String, String>)
+    public fun env(env: Map<String, String>)
 
     @KomodoDsl
-    fun props(props: Map<String, String>)
+    public fun props(props: Map<String, String>)
 
     @KomodoDsl
-    fun module(module: KClass<out Module>)
-
-    @KomodoDsl
-    fun module(module: Module)
+    public fun module(module: ModuleBuilder)
 }
 
-interface Komodo {
-    suspend fun run(type: KType)
-    suspend fun <R> runReturning(type: KType): R
-}
-
+// TODO: How to use DSL marker properly?
 @DslMarker
-annotation class KomodoDsl
+internal annotation class KomodoDsl
 
 @KomodoDsl
-suspend inline fun <reified T : UnitEntryPoint> komodo(
+public suspend inline fun <reified T : EntryPoint<Unit>> komodo(
     builder: KomodoBuilder.() -> Unit
 ) {
-    val komodoBuilder = DefaultKomodoBuilder()
-    builder(komodoBuilder)
-    val komodo = komodoBuilder.komodo()
-    komodo.run(typeOf<T>())
-}
-
-fun KomodoBuilder.module(builder: ModuleBuilder) {
-    module(object : Module {
-        override fun getBindings(): ModuleBuilder {
-            return builder
-        }
-    })
+    komodoReturning<T, Unit>(builder)
 }
 
 @KomodoDsl
-suspend inline fun <reified R> komodoReturning(
+public suspend inline fun <reified T : EntryPoint<R>, R> komodoReturning(
     builder: KomodoBuilder.() -> Unit
-): R {
+): R? {
     val komodoBuilder = DefaultKomodoBuilder()
     builder(komodoBuilder)
     val komodo = komodoBuilder.komodo()
-    return komodo.runReturning(typeOf<R>())
+    return komodo.run(type<T>())
 }

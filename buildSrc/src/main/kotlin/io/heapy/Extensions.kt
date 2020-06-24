@@ -10,6 +10,7 @@ object Extensions {
         when {
             Libs.kotlinVersion.contains("dev") -> maven { url = URI("https://dl.bintray.com/kotlin/kotlin-dev/") }
             Libs.kotlinVersion.contains("eap") -> maven { url = URI("https://dl.bintray.com/kotlin/kotlin-eap/") }
+            Libs.kotlinVersion.contains("-M") -> maven { url = URI("https://dl.bintray.com/kotlin/kotlin-eap/") }
         }
     }
 
