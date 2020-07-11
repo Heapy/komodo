@@ -1,17 +1,17 @@
 == Module system
 
-Today is obvious that any application builds from small and big, reusable or not parts. This parts can be functions or classes. Own and 3rd party libraries.'
+Today is obvious any application builds from small and big, reusable or not parts. These parts can be functions or classes. Own and 3rd party libraries.
 
-In Komodo module it's a number of classes, joint by some attribute: product feature, layer in architecture or some functionality provided by library behind a module.
+In Komodo module it's a number of classes, joint by some attribute: product feature, layer in architecture, or some functionality provided by library behind a module.
 
 In general, what determines the need for modules, and what problem they solve in Komodo:
 
 . Splitting application in layers (API, Service, Data);
 +
-It's allows to test and think about different levels separately. For example Data layer requires only JDBC module, so only Data and JDBC modules will be loaded for that test, Service, API, etc - will not be loaded. Also it's makes possible to automatically mock entire levels without any code.
+It's allows testing and thinking about different levels separately. For example Data layer requires only JDBC module, so only Data and JDBC modules will be loaded for that test, Service, API, etc - will not be loaded. Also, it's makes possible to automatically mock entire levels without any code.
 . Integrating 3rd party libraries with ease;
 +
-Komodo provides number of ready to use modules for popular libraries, like logback or HikariCP. These modules helps with convient configuration interfaces and ready to use bindings.
+Komodo provides number of ready to use modules for popular libraries, like logback or HikariCP. These modules help with convenient configuration interfaces and ready to use bindings.
 . Allows to decouple implementation from interfaces and create plugin system.
 
 '''
@@ -19,7 +19,7 @@ Komodo provides number of ready to use modules for popular libraries, like logba
 Even Spring Boot and Spring Framework have functionality close to Komodo Modules:
 
 Spring Context can be built from few separate XMLs, or Programmatic Configs, each of these XML or @Configuration files can be think like module;
-Spring Boot Starters also similar to Komodo modules, but they do all configuration under the hood. Komodo modules is not convention over configuration, you have to explicitly use or request particular module.
+Spring Boot Starters also similar to Komodo modules, but they do all configuration under the hood. Komodo modules is not convention over configuration, you have to explicitly use or request a particular module.
 
 '''
 

@@ -1,5 +1,6 @@
 == Contributors
 
+* https://github.com/realelias[@RealElias]
 * Your Name Here :)
 
 == Maintainers
@@ -7,4 +8,4 @@
 * https://github.com/IRus[@IRus]
 
 _To add yourself to this list just create pull request and add all current Maintainers to review.
-If pull request will be accepted but majority of reviewers - you will be added to this list._
+If pull request will be accepted by the majority of reviewers - you will be added to this list._

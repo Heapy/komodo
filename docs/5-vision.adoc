@@ -4,7 +4,7 @@ Core of Komodo - Dependency Injection and set of ready to use services like: con
 
 So it should be easy to replace any service with own implementation, or even replace all parts of Komodo, even DI library itself.
 
-We heavily use Kotlin features, and doesn't care about Java users of framework. For example we use Kotlin Coroutines, which currently (Kotlin 1.2) has experimental status.
+We heavily use Kotlin features, and doesn't care about Java users of framework. For example, we use Kotlin Coroutines, which currently (Kotlin 1.2) have experimental status.
 
 == When to Use?
 

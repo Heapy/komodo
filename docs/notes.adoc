@@ -17,7 +17,7 @@ http://docs.spring.io/spring-boot/docs/1.3.5.RELEASE/reference/html/configuratio
 https://github.com/lalyos/jfiglet[https://github.com/lalyos/jfiglet]
 https://picocli.info/[https://picocli.info/] (Еще генерирует файла автодополнения для баша, https://picocli.info/picocli-3.0-programmatic-api.html[https://picocli.info/picocli-3.0-programmatic-api.html])
 
-komodo-cli: interactive command startup - mainly for one-time running: enter arguments one by one. allow to choose arguments from run history.
+komodo-cli: interactive command startup - mainly for one-time running: enter arguments one by one. allows choosing arguments from run history.
 
 === Logger!
 
@@ -33,7 +33,7 @@ Cloudwatch, etc
 
 Например s3 модуль, в bq он может провайдить только один инстанс s3 с единственной конфигурацией, это неплохо, но хотелось бы:
 
-. расширять конфигурацию если она недостаточно полная. например не учтены все возможности конфигурации или хочется добавить какие-то свои параметры
+. расширять конфигурацию, если она недостаточно полная. например, не учтены все возможности конфигурации или хочется добавить какие-то свои параметры
 . иметь несколько конфигураций (для любого модуля без дополнительных усилий)
 . расширять модуль (т.к. конфигурация расширяема), т.е. override отдельных частей модулей. в случае jetty модуля это может быть override создания класса server
 
@@ -49,7 +49,7 @@ Cloudwatch, etc
 
 === Идея: Module as function?
 
-Если представить модуль некоторой композиций функций - то можно заменить некоторые функции, и получить новый модуль. Подумать на идеей, пример из spring-fu:
+Если представить модуль некоторой композицией функций - то можно заменить некоторые функции, и получить новый модуль. Подумать на идеей, пример из spring-fu:
 
 [source,kotlin]
 ----
