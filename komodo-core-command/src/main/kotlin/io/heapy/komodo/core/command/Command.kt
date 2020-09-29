@@ -1,7 +1,5 @@
 package io.heapy.komodo.core.command
 
-import io.heapy.komodo.experimental.ExperimentalApi
-
 /**
  * Base command interface
  *
@@ -11,8 +9,8 @@ import io.heapy.komodo.experimental.ExperimentalApi
 public interface Command {
     /**
      * Probably should be replaced with object from komodo-core-cli
+     * TODO!
      */
-    @ExperimentalApi
     public val name: String
     public suspend fun run()
 }

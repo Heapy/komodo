@@ -36,8 +36,8 @@ dependencies {
 suspend fun main() {
     komodo<Application> {
         module {
-            bindConcrete<Service1>()
-            bindConcrete<Service2>()
+            provide(::Service1)
+            provide(::Service2)
         }
     }
 }

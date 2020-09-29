@@ -10,7 +10,7 @@ object Libs {
     val kotlinScriptUtil = Lib("org.jetbrains.kotlin", "kotlin-script-util", kotlinVersion)
     val kotlinCompilerEmbeddable = Lib("org.jetbrains.kotlin", "kotlin-compiler-embeddable", kotlinVersion)
 
-    const val kotlinxCoroutinesVersion = "1.3.7"
+    const val kotlinxCoroutinesVersion = "1.3.9"
     val kotlinxCoroutines = Lib("org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8", kotlinxCoroutinesVersion)
     val kotlinxCoroutinesTest = Lib("org.jetbrains.kotlinx", "kotlinx-coroutines-test", kotlinxCoroutinesVersion)
 

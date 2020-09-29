@@ -4,6 +4,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class DelegationPatternBinderTest {
     interface Parent
@@ -13,9 +14,9 @@ class DelegationPatternBinderTest {
     @Test
     @Disabled
     internal fun test() = runBlockingTest {
-        val moduleDelegation = module {
-            bind<Parent, DelegateToParent>()
-            bind<DelegateToParent, ParentImplementation>()
+        val moduleDelegation by module {
+            implementBy<Parent, DelegateToParent>()
+            provide<DelegateToParent>(::ParentImplementation)
         }
 
         val ie1 = createContextAndGet(
@@ -50,12 +51,8 @@ class BasicBinderTest {
         fun get() = "Test3"
     }
 
-    class Test2Provider(
-        private val test3: Test3
-    ) : Provider<Test2> {
-        override suspend fun getInstance(): Test2 {
-            return Test2Impl(test3)
-        }
+    private suspend fun test2Provider(test3: Test3): Test2 {
+        return Test2Impl(test3)
     }
 
     class TestRoot(
@@ -65,30 +62,130 @@ class BasicBinderTest {
         fun run() = "${t1.get()} ${test2.get()}"
     }
 
-    private val module1 = module {
-        bind<Test1, Test1Impl>()
-        provide<Test2, Test2Provider>()
+    private val module1 by module {
+        provide<Test1>(::Test1Impl)
+        provide(::test2Provider)
     }
 
-    private val module2 = module {}
+    private val module2 by module {}
 
-    private val module3 = module {
-        bindConcrete<Test3>()
-        bindConcrete<TestRoot>()
+    private val module3 by module {
+        provide(::Test3)
+        provide(::TestRoot)
     }
 
     @Test
-    fun main() = runBlockingTest {
+    fun test() = runBlockingTest {
         val testProvider = createContextAndGet(
             type<Provider<TestRoot>>(),
             listOf(module1, module2, module3)
         )
 
-        val test = testProvider.getInstance()
+        val test = testProvider.new()
 
         assertEquals(
             "Test1Impl Test2Impl Test3 Test2Impl Test3",
             test.run()
         )
+    }
+}
+
+class OptionalInjectionTest {
+    class Foo(
+        val bar: Bar?
+    )
+
+    class Bar
+
+    private val module1 by module {
+        provide(::Foo)
+    }
+
+    @Test
+    fun `test constructor`() = runBlockingTest {
+        val foo = createContextAndGet(
+            type<Foo>(),
+            listOf(module1)
+        )
+
+        assertNull(foo.bar)
+    }
+
+    private fun createFoo(bar: Bar?): Foo {
+        return Foo(bar)
+    }
+
+    private val module2 by module {
+        provide(::createFoo)
+    }
+
+    @Test
+    fun `test provider`() = runBlockingTest {
+        val foo = createContextAndGet(
+            type<Foo>(),
+            listOf(module2)
+        )
+
+        assertNull(foo.bar)
+    }
+}
+
+/**
+ * ## Cyclic Dependencies
+ *
+ * We doesn't support cyclic dependencies,
+ * instead of "hacking" classes thought proxies,
+ * setters and field injections
+ * we require our user to fix their architecture.
+ */
+class CyclicDependencyTest {
+    class Foo(val bar: Bar)
+    class Bar(val baz: Baz)
+    class Baz(val foo: Foo)
+
+    val cyclic by module {
+        provide(::Foo)
+        provide(::Bar)
+        provide(::Baz)
+    }
+
+    @Test
+    fun `test cyclic dependencies`() = runBlockingTest {
+        val exception = assertThrows<ContextException> {
+            runBlockingTest {
+                createContextAndGet(
+                    type<Foo>(),
+                    listOf(cyclic)
+                )
+            }
+        }
+
+        assertEquals("""
+            Some Exception here
+        """.trimIndent(), exception.message)
+    }
+}
+
+class ObjectBindingTest {
+    object ToBind
+
+    private val obj by module {
+        provide { ToBind }
+    }
+
+    @Test
+    fun `komodo dissallows object binding`() = runBlockingTest {
+        val exception = assertThrows<ContextException> {
+            runBlockingTest {
+                createContextAndGet(
+                    type<ToBind>(),
+                    listOf(obj)
+                )
+            }
+        }
+
+        assertEquals("""
+            Some Exception here
+        """.trimIndent(), exception.message)
     }
 }

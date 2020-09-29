@@ -10,11 +10,11 @@ import java.nio.file.Paths
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-interface Env {
+public interface Env {
     /**
      * Throws exception, if env not found
      */
-    fun get(env: String): String {
+    public fun get(env: String): String {
         return getOrNull(env)
             ?: throw EnvNotDefinedException("$env not defined.")
     }
@@ -22,12 +22,12 @@ interface Env {
     /**
      * Returns null, if env not found
      */
-    fun getOrNull(env: String): String?
+    public fun getOrNull(env: String): String?
 }
 
-class EnvNotDefinedException(message: String) : RuntimeException(message)
+internal class EnvNotDefinedException(message: String) : RuntimeException(message)
 
-class Dotenv(
+public class Dotenv(
     /**
      * Env file location
      */
@@ -77,4 +77,4 @@ class Dotenv(
     }
 }
 
-class DotenvFileNotFoundException(message: String) : RuntimeException(message)
+internal class DotenvFileNotFoundException(message: String) : RuntimeException(message)

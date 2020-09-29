@@ -6,7 +6,7 @@ package io.heapy.komodo.exceptions
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-open class KomodoException(
+public open class KomodoException(
     override val message: String,
     private val module: String,
     private val code: String,

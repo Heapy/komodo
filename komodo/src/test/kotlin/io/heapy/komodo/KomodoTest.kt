@@ -1,19 +1,19 @@
 package io.heapy.komodo
 
-import io.heapy.komodo.di.bindConcrete
 import io.heapy.komodo.di.module
+import io.heapy.komodo.di.provide
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-class KomodoTest {
+class KomodoReturningTest {
     @Test
     fun `test inline module`() = runBlockingTest {
         val result = komodoReturning<Application, String> {
             module {
-                bindConcrete<Service1>()
-                bindConcrete<Service2>()
+                provide(::Service1)
+                provide(::Service2)
             }
         }
 
@@ -69,12 +69,82 @@ class KomodoTest {
         }
     }
 
-    private val k1 = module {
+    private val k1 by module {
         dependency(k2)
-        bindConcrete<Service1>()
+        provide(::Service1)
     }
 
-    private val k2 = module {
-        bindConcrete<Service2>()
+    private val k2 by module {
+        provide(::Service2)
+    }
+}
+
+class KomodoTest {
+    @Test
+    fun `test inline module`() = runBlockingTest {
+        komodo<Application> {
+            module {
+                provide(::Service1)
+                provide(::Service2)
+            }
+        }
+    }
+
+    @Test
+    fun `test module`() = runBlockingTest {
+        val result = komodo<Application> {
+            module(k1)
+        }
+
+        assertEquals("Hello, World!", result)
+    }
+
+    @Test
+    @Disabled
+    fun `test private module`() = runBlockingTest {
+        val result = komodo<PrivateApplication> {
+            module(k1)
+        }
+
+        assertEquals("Hello, World!", result)
+    }
+
+    private class PrivateApplication(
+        private val service1: Service1
+    ) : UnitEntryPoint {
+        override suspend fun run() {
+            service1.run()
+        }
+    }
+
+    class Application(
+        private val service1: Service1
+    ) : UnitEntryPoint {
+        override suspend fun run() {
+            service1.run()
+        }
+    }
+
+    class Service1(
+        private val service2: Service2
+    ) {
+        fun run() {
+            service2.hello()
+        }
+    }
+
+    class Service2 {
+        fun hello(): String {
+            return "Hello, World!"
+        }
+    }
+
+    private val k1 by module {
+        dependency(k2)
+        provide(::Service1)
+    }
+
+    private val k2 by module {
+        provide(::Service2)
     }
 }

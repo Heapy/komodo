@@ -58,17 +58,16 @@ internal class DefaultKomodo(
     private val props: Map<String, String>
 ) : Komodo {
     override suspend fun <T : EntryPoint<R>, R> run(type: GenericType<T>): R {
-        val moduleInstances = modules
-            .asSequence()
-            .plus(module {
-                val key = Key(type.actual)
-                contribute(
-                    BeanDefinition(
-                        classKey = key,
-                        interfaceKey = key
-                    )
+        val komodoModule by module {
+            val key = Key(type.actual)
+            contribute(
+                BeanDefinition(
+                    classKey = key,
+                    interfaceKey = key
                 )
-            })
-        return createContextAndGet(type, moduleInstances.toList()).run()
+            )
+        }
+
+        return createContextAndGet(type, modules.plus(komodoModule)).run()
     }
 }

@@ -11,7 +11,7 @@ import kotlin.system.exitProcess
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-class JvmShutdownManager : ShutdownManager {
+internal class JvmShutdownManager : ShutdownManager {
     private val listeners = CopyOnWriteArraySet<ShutdownListener>()
 
     fun start() {
@@ -47,3 +47,9 @@ class JvmShutdownManager : ShutdownManager {
         }
     }
 }
+
+private data class ShutdownListener(
+    val name: String,
+    val priority: Int,
+    val callback: suspend () -> Unit
+)

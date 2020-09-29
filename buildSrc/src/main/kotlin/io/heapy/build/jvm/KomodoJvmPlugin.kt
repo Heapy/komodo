@@ -48,16 +48,20 @@ class KomodoJvmPlugin : Plugin<Project> {
     }
 
     private fun Project.config() {
-        val bytecodeVersion = JavaVersion.VERSION_1_8
+        val kotlinLanguageVersion = "1.4"
+
+        val bytecodeVersion = JavaVersion.VERSION_11
 
         val commonCompilerArgs = listOf(
             "-progressive",
             "-Xopt-in=kotlin.ExperimentalStdlibApi",
-            "-Xopt-in=kotlin.RequiresOptIn"
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xemit-jvm-type-annotations"
         )
 
         tasks.named<KotlinCompile>("compileTestKotlin") {
             kotlinOptions {
+                languageVersion = kotlinLanguageVersion
                 freeCompilerArgs = freeCompilerArgs + commonCompilerArgs + listOf(
                     "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
                 )
@@ -67,6 +71,7 @@ class KomodoJvmPlugin : Plugin<Project> {
 
         tasks.named<KotlinCompile>("compileKotlin") {
             kotlinOptions {
+                languageVersion = kotlinLanguageVersion
                 freeCompilerArgs = freeCompilerArgs + commonCompilerArgs + listOf(
                     "-Xexplicit-api=warning"
                 )
