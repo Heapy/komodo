@@ -17,7 +17,7 @@ jobs:
 
 script:
   - ./gradlew check :jacocoRootReport
-  - ./gradlew asciidoctor asciidoctorPdf
+  - ./gradlew asciidoctor asciidoctorPdf versionFile
 
 after_success:
   - bash ./.ci/codecov-8a28df4.sh

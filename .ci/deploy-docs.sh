@@ -11,3 +11,5 @@ ssh-add ~/.ssh/deploy@morty
 
 echo "Sync with remote folder..."
 rsync -r --verbose "${TRAVIS_BUILD_DIR}/komodo-docs/build/dist/" deploy@heapy.io:~/files/heapy.io/komodo/docs/
+source "${TRAVIS_BUILD_DIR}/komodo-docs/build/dist/version.properties"
+ssh deploy@heapy.io "rm  ~/files/heapy.io/komodo/docs/latest; ln -s ~/files/heapy.io/komodo/docs/${version} ~/files/heapy.io/komodo/docs/latest"

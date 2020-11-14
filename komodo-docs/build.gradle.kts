@@ -1,6 +1,7 @@
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 import org.asciidoctor.gradle.jvm.pdf.AsciidoctorPdfTask
 import java.time.LocalDate
+import kotlin.text.Charsets.UTF_8
 
 plugins {
     id("org.asciidoctor.jvm.convert").version("3.1.0")
@@ -58,4 +59,16 @@ val asciidoctorPdf by tasks.existing(AsciidoctorPdfTask::class) {
     )
 
     setOutputDir(buildDir.resolve("dist").resolve("$version"))
+}
+
+val versionFile by tasks.creating {
+    group = "documentation"
+    doLast {
+        val file = buildDir.resolve("dist")
+        file.mkdirs()
+        file.resolve("version.properties").writeText(
+            "version=$version",
+            UTF_8
+        )
+    }
 }
