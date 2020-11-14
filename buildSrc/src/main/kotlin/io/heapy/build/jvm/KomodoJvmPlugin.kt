@@ -50,7 +50,7 @@ class KomodoJvmPlugin : Plugin<Project> {
     private fun Project.config() {
         val kotlinLanguageVersion = "1.4"
 
-        val bytecodeVersion = JavaVersion.VERSION_11
+        val bytecodeVersion = JavaVersion.VERSION_1_8
 
         val commonCompilerArgs = listOf(
             "-progressive",
