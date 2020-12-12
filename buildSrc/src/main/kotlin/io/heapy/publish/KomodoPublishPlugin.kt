@@ -11,13 +11,13 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.kotlin.dsl.named
 import org.gradle.plugins.signing.SigningExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import java.util.Date
@@ -31,30 +31,11 @@ import java.util.Date
 class KomodoPublishPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         project.defaultRepositories()
-        project.plugins.apply("signing")
-        project.plugins.apply("java-library")
-        project.plugins.apply("maven-publish")
-        project.plugins.apply("com.jfrog.bintray")
-        project.plugins.apply("org.jetbrains.dokka")
-
-        val sourcesJar = project.tasks.create<Jar>("sourcesJar") {
-            group = "documentation"
-            val sourceSets: SourceSetContainer by project
-            from(sourceSets["main"].allSource)
-            archiveClassifier.set("sources")
-        }
-
-        val dokka = project.tasks.getByName<DokkaTask>("dokka") {
-            outputFormat = "html"
-            outputDirectory = "${project.buildDir}/dokka"
-        }
-
-        val dokkaJar = project.tasks.create<Jar>("dokkaJar") {
-            group = "documentation"
-            dependsOn(dokka)
-            from(dokka.outputDirectory)
-            archiveClassifier.set("javadoc")
-        }
+        project.pluginManager.apply("signing")
+        project.pluginManager.apply("java-library")
+        project.pluginManager.apply("maven-publish")
+        project.pluginManager.apply("com.jfrog.bintray")
+        project.pluginManager.apply("org.jetbrains.dokka")
 
         val isBOM = project.name == "komodo-bom"
 
@@ -75,8 +56,9 @@ class KomodoPublishPlugin : Plugin<Project> {
                         version = project.version.toString()
 
                         if (!isBOM) {
-                            artifact(sourcesJar)
-                            artifact(dokkaJar)
+                            artifact(project.sourcesJar())
+                            artifact(project.dokkaJavadocJar())
+                            artifact(project.dokkaHtmlJar())
                         }
 
                         pom {
@@ -170,6 +152,30 @@ class KomodoPublishPlugin : Plugin<Project> {
                     dependency.appendNode("version", it.version)
                 }
             }
+        }
+    }
+
+    private fun Project.sourcesJar(): TaskProvider<Jar> {
+        return project.tasks.named<Jar>("kotlinSourcesJar")
+    }
+
+    private fun Project.dokkaJavadocJar(): TaskProvider<Jar> {
+        return project.tasks.register<Jar>("dokkaJavadocJar") {
+            group = "documentation"
+            val dokkaJavadoc = project.tasks.named<DokkaTask>("dokkaJavadoc")
+            dependsOn(dokkaJavadoc)
+            from(dokkaJavadoc.flatMap { it.outputDirectory })
+            archiveClassifier.set("javadoc")
+        }
+    }
+
+    private fun Project.dokkaHtmlJar(): TaskProvider<Jar> {
+        return project.tasks.register<Jar>("dokkaHtmlJar") {
+            group = "documentation"
+            val dokkaHtml = project.tasks.named<DokkaTask>("dokkaHtml")
+            dependsOn(dokkaHtml)
+            from(dokkaHtml.flatMap { it.outputDirectory })
+            archiveClassifier.set("html-doc")
         }
     }
 
