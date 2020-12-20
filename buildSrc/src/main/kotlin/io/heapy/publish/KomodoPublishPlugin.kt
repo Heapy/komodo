@@ -57,8 +57,11 @@ class KomodoPublishPlugin : Plugin<Project> {
 
                         if (!isBOM) {
                             artifact(project.sourcesJar())
-                            artifact(project.dokkaJavadocJar())
-                            artifact(project.dokkaHtmlJar())
+                            val dokkaVerySlow = true
+                            if (!dokkaVerySlow) {
+                                artifact(project.dokkaJavadocJar())
+                                artifact(project.dokkaHtmlJar())
+                            }
                         }
 
                         pom {
