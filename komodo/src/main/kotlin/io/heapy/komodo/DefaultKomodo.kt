@@ -1,11 +1,12 @@
 package io.heapy.komodo
 
-import io.heapy.komodo.di.BeanDefinition
+import io.heapy.komodo.di.Binding
 import io.heapy.komodo.di.GenericType
-import io.heapy.komodo.di.Key
-import io.heapy.komodo.di.ModuleBuilder
+import io.heapy.komodo.di.Module
+import io.heapy.komodo.di.ModuleProvider
 import io.heapy.komodo.di.createContextAndGet
 import io.heapy.komodo.di.module
+import io.heapy.komodo.di.provide
 
 /**
  * @author Ruslan Ibragimov
@@ -13,14 +14,11 @@ import io.heapy.komodo.di.module
  */
 @PublishedApi
 internal class DefaultKomodoBuilder : KomodoBuilder {
-    private val modules = mutableListOf<ModuleBuilder>()
+    private val modules = mutableListOf<ModuleProvider>()
+    private val bindings = mutableListOf<Binding>()
     private val args = mutableListOf<String>()
     private val env = mutableMapOf<String, String>()
     private val props = mutableMapOf<String, String>()
-
-    override fun module(module: ModuleBuilder) {
-        modules += module
-    }
 
     override fun args(args: Array<String>) {
         this.args += args
@@ -34,40 +32,58 @@ internal class DefaultKomodoBuilder : KomodoBuilder {
         this.props += props
     }
 
+    override fun dependency(module: ModuleProvider) {
+        modules += module
+    }
+
+    override fun contribute(binding: Binding) {
+        bindings += binding
+    }
+
     @PublishedApi
     internal fun komodo(): Komodo {
         return DefaultKomodo(
             modules = modules.toList(),
             env = env.toMap(),
             args = args.toTypedArray(),
-            props = props.toMap()
+            props = props.toMap(),
+            bindings = bindings.toList()
         )
     }
 }
 
 @PublishedApi
 internal interface Komodo {
-    suspend fun <T : EntryPoint<R>, R> run(type: GenericType<T>): R
+    suspend fun <T : EntryPoint<R>, R> run(source: String, type: GenericType<T>): R
 }
+
+internal class EnvMap(val env: Map<String, String>)
+internal class PropMap(val props: Map<String, String>)
+internal class ArgList(val args: Array<String>)
 
 @KomodoDsl
 internal class DefaultKomodo(
-    private val modules: List<ModuleBuilder>,
+    private val modules: List<ModuleProvider>,
+    private val bindings: List<Binding>,
     private val env: Map<String, String>,
     private val args: Array<String>,
     private val props: Map<String, String>
 ) : Komodo {
-    override suspend fun <T : EntryPoint<R>, R> run(type: GenericType<T>): R {
+    override suspend fun <T : EntryPoint<R>, R> run(source: String, type: GenericType<T>): R {
         val komodoModule by module {
-            val key = Key(type.actual)
-            contribute(
-                BeanDefinition(
-                    classKey = key,
-                    interfaceKey = key
-                )
-            )
+            provide({ EnvMap(env) })
+            provide({ PropMap(props) })
+            provide({ ArgList(args) })
         }
 
-        return createContextAndGet(type, modules.plus(komodoModule)).run()
+        val komodoModuleProvider = {
+            object : Module {
+                override val source = source
+                override val dependencies = modules + komodoModule
+                override val bindings = this@DefaultKomodo.bindings
+            }
+        }
+
+        return createContextAndGet(type, komodoModuleProvider).run()
     }
 }

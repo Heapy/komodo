@@ -1,13 +1,11 @@
 package io.heapy.komodo.di
 
-import org.koin.ext.getFullName
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
-import kotlin.reflect.full.isSubtypeOf
-import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.callSuspendBy
 import kotlin.reflect.typeOf
 
 /**
@@ -16,6 +14,8 @@ import kotlin.reflect.typeOf
  * what introduces more boilerplate.
  */
 public typealias ModuleBuilder = Binder.() -> Unit
+
+public typealias ModuleProvider = () -> Module
 
 public interface Module {
     /**
@@ -27,7 +27,7 @@ public interface Module {
     /**
      * Dependencies of this module
      */
-    public val dependencies: List<Module>
+    public val dependencies: List<ModuleProvider>
 
     /**
      * Bindings defined in this module
@@ -37,7 +37,7 @@ public interface Module {
 
 internal class DefaultModule(
     override val source: String,
-    override val dependencies: List<Module>,
+    override val dependencies: List<ModuleProvider>,
     override val bindings: List<Binding>
 ) : Module
 
@@ -48,24 +48,85 @@ internal class DefaultModule(
  * @since 0.1.0
  */
 public interface Binder {
-    public fun dependency(module: ModuleBuilder)
+    public fun dependency(module: ModuleProvider)
     public fun contribute(binding: Binding)
 }
 
-
 @ModuleDSL
-public fun module(builder: ModuleBuilder): ReadOnlyProperty<Any?, ModuleBuilder> {
+public fun module(builder: ModuleBuilder): ReadOnlyProperty<Any?, ModuleProvider> {
     return ModuleBuilderDelegate(builder)
+}
+
+private class ContainerBinder : Binder {
+    private val _modules = mutableListOf<ModuleProvider>()
+    private val _bindings = mutableListOf<Binding>()
+
+    val modules: List<ModuleProvider> by ::_modules
+    val bindings: List<Binding> by ::_bindings
+
+    override fun dependency(module: ModuleProvider) {
+        _modules.add(module)
+    }
+
+    override fun contribute(binding: Binding) {
+        _bindings.add(binding)
+    }
+}
+
+private class ModuleBuilderDelegateModuleProvider(
+    private val builder: ModuleBuilder,
+    private val source: String
+) : ModuleProvider {
+    override fun invoke(): Module {
+        val binder = ContainerBinder()
+        this.builder.invoke(binder)
+
+        return DefaultModule(
+            source = source,
+            dependencies = binder.modules,
+            bindings = binder.bindings
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ModuleBuilderDelegateModuleProvider
+
+        if (builder != other.builder) return false
+        if (source != other.source) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = builder.hashCode()
+        result = 31 * result + source.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "ModuleBuilderDelegateModuleProvider(source='$source')"
+    }
 }
 
 private class ModuleBuilderDelegate(
     private val builder: ModuleBuilder
-) : ReadOnlyProperty<Any?, ModuleBuilder> {
-    override operator fun getValue(thisRef: Any?, property: KProperty<*>): ModuleBuilder {
-        println(builder::class.java.name)
-        println(property.name) // valResource
-        println(builder::class.getFullName()) // io.heapy.komodo.di.BinderKt$valResource$2
-        return builder
+) : ReadOnlyProperty<Any?, ModuleProvider> {
+    override operator fun getValue(
+        thisRef: Any?,
+        property: KProperty<*>
+    ): ModuleProvider {
+        val fullName = builder::class.toString()
+        val variableName = property.name
+        val place = fullName.substringBefore("$$variableName")
+        val source = "$place.$variableName"
+
+        return ModuleBuilderDelegateModuleProvider(
+            builder = builder,
+            source = source
+        )
     }
 }
 
@@ -90,36 +151,36 @@ public sealed class Binding(
     internal val key: Key
 )
 
-public class ClassBinding(
+public class BindingWithModule(
     key: Key,
-    internal val classKey: Key,
-    internal val instance: Any? = UNDEFINED
-) : Binding(key)
-
-internal val UNDEFINED = Any()
+    internal val binding: Binding,
+    internal val module: Module
+): Binding(key)
 
 public class InstanceBinding(
     key: Key,
     internal val instance: Any?
 ) : Binding(key)
 
-public class ProviderClassBinding(
+public class ZeroArgProviderBinding(
     key: Key,
-    internal val classKey: Key,
-    internal val provider: Provider<*>? = UNDEFINED_PROVIDER
+    internal val provider: suspend () -> Any?
 ) : Binding(key)
 
-internal val UNDEFINED_PROVIDER = object : Provider<Any> {
-    override suspend fun new(): Any = UNDEFINED
-}
+public class ProviderBinding(
+    key: Key,
+    internal val provider: KFunction<Any?>
+) : Binding(key)
 
-public class BeanDefinition(
-    internal val classKey: Key,
-    internal val interfaceKey: Key,
-    internal val isProvider: Boolean = false,
-    internal var instance: Any? = null,
-    internal var provider: Provider<*>? = null
-) : Binding(interfaceKey)
+public class ListProviderBinding(
+    key: Key,
+    internal val provider: KFunction<Any?>
+) : Binding(key)
+
+public class DelegateBinding(
+    key: Key,
+    delegatedTo: Key
+) : Binding(key)
 
 public inline class GenericType<T : Any>(
     public val actual: KType
@@ -140,78 +201,106 @@ public interface Context {
 }
 
 internal class KomodoContext(
-    private val definitions: Map<Key, Binding>
+    private val definitions: Map<Key, BindingWithModule>
 ) : Context {
+    @Suppress("UNCHECKED_CAST")
     override suspend fun <T : Any> get(key: Key): T {
         return if (key.isProvider()) {
-            try {
-                createType(key, definitions) as T
-            } catch (e: Exception) {
-                // TODO: Probably this is bad idea
-                object : Provider<Any> {
-                    override suspend fun new(): Any {
-                        return createType(Key(key.type.arguments.first().type!!), definitions) as Any
-                    }
-                } as T
+            object : Provider<Any?> {
+                override suspend fun new(): Any? {
+                    return createType(Key(key.type.arguments.first().type!!), definitions)
+                }
             }
         } else {
-            createType(key, definitions) as T
-        }
+            createType(key, definitions)
+        } as T
     }
 }
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun Key.isProvider(): Boolean {
-    return type.isSubtypeOf(typeOf<Provider<*>>())
-}
-
-public class KomodoBinder : Binder {
-    private val definitions = mutableMapOf<Key, Binding>()
-    private val modules = mutableSetOf<ModuleBuilder>()
-
-    override fun dependency(module: ModuleBuilder) {
-        modules.add(module)
-    }
-
-    override fun contribute(binding: Binding) {
-        if (!definitions.contains(binding.key)) {
-            definitions[binding.key] = binding
-        } else {
-            throw ContextException("Binding already present")
-        }
-    }
-
-    public fun createContext(): Context {
-        modules.forEach { module ->
-            module.invoke(this)
-        }
-        return KomodoContext(definitions.toMap())
-    }
+    return type.classifier == Provider::class
 }
 
 public suspend fun <T : Any> createContextAndGet(
     type: GenericType<T>,
-    modules: List<ModuleBuilder>
+    moduleProvider: ModuleProvider
 ): T {
-    val binder = KomodoBinder()
-    modules.forEach { module ->
-        module.invoke(binder)
+    val bindings = mutableMapOf<Key, BindingWithModule>()
+    val processedModules = mutableMapOf<ModuleProvider, Module>()
+
+    val rootModule = moduleProvider()
+    processedModules[moduleProvider] = rootModule
+
+    processModuleTree(rootModule, processedModules)
+
+    processedModules.forEach { (_, module) ->
+        processBindings(bindings, module)
     }
-    val key = Key(type.actual)
-    return binder.createContext().get(key)
+
+    return KomodoContext(bindings.toMap()).get(Key(type.actual))
+}
+
+private fun processModuleTree(parent: Module, modules: MutableMap<ModuleProvider, Module>) {
+    parent.dependencies.forEach { moduleProvider ->
+        val processedModule = modules[moduleProvider]
+        if (processedModule == null) {
+            val module = moduleProvider()
+            modules[moduleProvider] = module
+
+            if (module.dependencies.isNotEmpty()) {
+                processModuleTree(module, modules)
+            }
+        } else {
+            print("Same module defined in [${processedModule.source}] and [${parent.source}].")
+        }
+    }
+}
+
+private fun processBindings(bindings: MutableMap<Key, BindingWithModule>, module: Module) {
+    module.bindings.forEach { binding ->
+        val processedBinding = bindings[binding.key]
+
+        if (processedBinding == null) {
+            bindings[binding.key] = BindingWithModule(
+                key = binding.key,
+                module = module,
+                binding = binding
+            )
+        } else {
+            val processed = processedBinding.module.source
+            val current = module.source
+
+            if (current == processed) {
+                throw ContextException("Binding duplicated in module [$current].")
+            } else {
+                throw ContextException("Binding already present in module [$processed]. " +
+                        "Current module: [$current]")
+            }
+        }
+    }
 }
 
 internal suspend fun createType(
     key: Key,
-    definitions: Map<Key, Binding>,
+    definitions: Map<Key, BindingWithModule>,
     stack: MutableList<Key> = mutableListOf()
 ): Any? {
     if (stack.contains(key)) {
         throw ContextException("A circular dependency found: ${printCircularDependencyGraph(key, stack, definitions)}")
     }
 
-    val isOptional = key.type.isMarkedNullable
-    val binding = definitions[key] as BeanDefinition?
+    val type = key.type
+    val classifier = type.classifier
+    val isOptional = type.isMarkedNullable
+
+    if (classifier is KClass<*>) {
+        if (classifier.objectInstance != null) {
+            throw ContextException("Objects not allowed to bind")
+        }
+    }
+
+    val binding = definitions[key]
 
     return if (binding == null) {
         if (isOptional) {
@@ -220,36 +309,29 @@ internal suspend fun createType(
             throw ContextException("Required $key not found in context.")
         }
     } else {
-        if (binding.instance != null) {
-            return binding.instance
-        }
-
+        stack.add(key)
         // TODO: Don't create anything, but just save all actions and metadata,
         //   it will allow to implement dry-run and
         //   and create source code - equivalent of DI
-        val type = binding.classKey.type
-        val clazz = type.classifier as KClass<*>
-        val ctr = clazz.primaryConstructor ?: throw ContextException("The primary constructor is missing.")
-        stack.add(key)
-        val params = ctr.parameters.associateWith {
-            createType(Key(it.type), definitions, stack)
+        val instance = when(val actualBinding = binding.binding) {
+            is BindingWithModule -> throw ContextException("BindingWithModule shouldn't be used not in root set.")
+            is InstanceBinding -> actualBinding.instance
+            is ZeroArgProviderBinding -> actualBinding.provider.invoke()
+            is ProviderBinding -> {
+                val params = actualBinding.provider.parameters.associateWith { param ->
+                    createType(Key(param.type), definitions, stack)
+                }
+
+                if (actualBinding.provider.isSuspend) {
+                    actualBinding.provider.callSuspendBy(params)
+                } else {
+                    actualBinding.provider.callBy(params)
+                }
+            }
+            is ListProviderBinding -> TODO()
+            is DelegateBinding -> TODO()
         }
         stack.remove(key)
-
-        val instance = if (binding.isProvider) {
-            val cached = binding.provider?.new()
-            if (cached == null) {
-                val provider = (ctr.callBy(params) as Provider<*>)
-                binding.provider = provider
-                provider.new()
-            } else {
-                cached
-            }
-        } else {
-            ctr.callBy(params)
-        }
-
-        binding.instance = instance
 
         instance
     }
@@ -262,7 +344,7 @@ internal class ContextException(
 public fun printCircularDependencyGraph(
     key: Key,
     stack: MutableList<Key>,
-    bindings: Map<Key, Binding>
+    bindings: Map<Key, BindingWithModule>
 ): String {
     return buildString {
         appendLine()
@@ -271,10 +353,13 @@ public fun printCircularDependencyGraph(
             append(stackKey.type.classifier)
             bindings[stackKey]?.let {
                 append(" implemented by ")
-                val desc = when (it) {
-                    is ClassBinding -> "${it.classKey.type.classifier}"
-                    is InstanceBinding -> "instance [${it.instance}]"
-                    is ProviderClassBinding -> "provider [${it.classKey.type.classifier}]"
+                val desc = when (val binding = it.binding) {
+                    is InstanceBinding -> "instance [${binding.instance}]"
+                    is ZeroArgProviderBinding -> "provider [${binding.provider::class}]"
+                    is ProviderBinding -> "provider [${binding.provider::class}]"
+                    is ListProviderBinding -> TODO()
+                    is BindingWithModule -> TODO()
+                    is DelegateBinding -> TODO()
                     else -> TODO()
                 }
                 append(desc)
@@ -289,10 +374,13 @@ public fun printCircularDependencyGraph(
         append(key.type.classifier)
         bindings[key]?.let {
             append(" implemented by ")
-            val desc = when (it) {
-                is ClassBinding -> (it.classKey.type.classifier as KClass<*>).simpleName
-                is InstanceBinding -> "instance [${it.instance}]"
-                is ProviderClassBinding -> "provider [${it.classKey.type.classifier}]"
+            val desc = when (val binding = it.binding) {
+                is InstanceBinding -> "instance [${binding.instance}]"
+                is ZeroArgProviderBinding -> "provider [${binding.provider::class}]"
+                is ProviderBinding -> "provider [${binding.provider::class}]"
+                is ListProviderBinding -> TODO()
+                is BindingWithModule -> TODO()
+                is DelegateBinding -> TODO()
                 else -> TODO()
             }
             append(desc)
@@ -324,12 +412,13 @@ public fun printCircularDependencyGraph(
 // warmUp function - top level function that can be executed before server will be started
 
 @ModuleDSL
-public inline fun <reified I : Any, reified C : I> Binder.implementBy(
-    customizer: (BeanDefinition) -> BeanDefinition = { it }
+public inline fun <reified I : Any> Binder.provide(
+    noinline provider: suspend () -> I,
+    customizer: (Binding) -> Binding = { it }
 ) {
-    BeanDefinition(
-        classKey = Key(typeOf<C>()),
-        interfaceKey = Key(typeOf<I>())
+    ZeroArgProviderBinding(
+        key = Key(typeOf<I>()),
+        provider = provider
     ).also {
         contribute(customizer(it))
     }
@@ -337,28 +426,12 @@ public inline fun <reified I : Any, reified C : I> Binder.implementBy(
 
 @ModuleDSL
 public inline fun <reified I : Any> Binder.provide(
-    noinline provider: suspend () -> I
-) {
-    // is provider suspend?
-    BeanDefinition(
-        classKey = Key(typeOf<I>()),
-        interfaceKey = Key(typeOf<I>()),
-        isProvider = true
-    ).also {
-        contribute(it)
-    }
-}
-
-@ModuleDSL
-public inline fun <reified I : Any> Binder.provide(
     provider: KFunction<I>,
-    customizer: (BeanDefinition) -> BeanDefinition = { it }
+    customizer: (Binding) -> Binding = { it }
 ) {
-    // is provider suspend?
-    BeanDefinition(
-        classKey = Key(typeOf<I>()),
-        interfaceKey = Key(typeOf<I>()),
-        isProvider = true
+    ProviderBinding(
+        key = Key(typeOf<I>()),
+        provider = provider
     ).also {
         contribute(customizer(it))
     }
@@ -367,13 +440,23 @@ public inline fun <reified I : Any> Binder.provide(
 @ModuleDSL
 public inline fun <reified I : Any> Binder.provideList(
     provider: KFunction<I>,
-    customizer: (BeanDefinition) -> BeanDefinition = { it }
+    customizer: (Binding) -> Binding = { it }
 ) {
-    // is provider suspend?
-    BeanDefinition(
-        classKey = Key(typeOf<I>()),
-        interfaceKey = Key(typeOf<I>()),
-        isProvider = true
+    ListProviderBinding(
+        key = Key(typeOf<I>()),
+        provider = provider
+    ).also {
+        contribute(customizer(it))
+    }
+}
+
+@ModuleDSL
+public inline fun <reified I1: Any, reified I2 : I1> Binder.implementBy(
+    customizer: (Binding) -> Binding = { it }
+) {
+    DelegateBinding(
+        key = Key(typeOf<I1>()),
+        delegatedTo = Key(typeOf<I2>())
     ).also {
         contribute(customizer(it))
     }

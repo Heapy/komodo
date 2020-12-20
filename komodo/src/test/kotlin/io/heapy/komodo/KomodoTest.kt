@@ -4,17 +4,15 @@ import io.heapy.komodo.di.module
 import io.heapy.komodo.di.provide
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class KomodoReturningTest {
     @Test
     fun `test inline module`() = runBlockingTest {
         val result = komodoReturning<Application, String> {
-            module {
-                provide(::Service1)
-                provide(::Service2)
-            }
+            provide(::Application)
+            provide(::Service1)
+            provide(::Service2)
         }
 
         assertEquals("Hello, World!", result)
@@ -23,28 +21,11 @@ class KomodoReturningTest {
     @Test
     fun `test module`() = runBlockingTest {
         val result = komodoReturning<Application, String> {
-            module(k1)
+            provide(::Application)
+            dependency(k1)
         }
 
         assertEquals("Hello, World!", result)
-    }
-
-    @Test
-    @Disabled
-    fun `test private module`() = runBlockingTest {
-        val result = komodoReturning<PrivateApplication, String> {
-            module(k1)
-        }
-
-        assertEquals("Hello, World!", result)
-    }
-
-    private class PrivateApplication(
-        private val service1: Service1
-    ) : EntryPoint<String> {
-        override suspend fun run(): String {
-            return service1.run()
-        }
     }
 
     class Application(
@@ -83,37 +64,17 @@ class KomodoTest {
     @Test
     fun `test inline module`() = runBlockingTest {
         komodo<Application> {
-            module {
-                provide(::Service1)
-                provide(::Service2)
-            }
+            provide(::Application)
+            provide(::Service1)
+            provide(::Service2)
         }
     }
 
     @Test
     fun `test module`() = runBlockingTest {
-        val result = komodo<Application> {
-            module(k1)
-        }
-
-        assertEquals("Hello, World!", result)
-    }
-
-    @Test
-    @Disabled
-    fun `test private module`() = runBlockingTest {
-        val result = komodo<PrivateApplication> {
-            module(k1)
-        }
-
-        assertEquals("Hello, World!", result)
-    }
-
-    private class PrivateApplication(
-        private val service1: Service1
-    ) : UnitEntryPoint {
-        override suspend fun run() {
-            service1.run()
+        komodo<Application> {
+            provide(::Application)
+            dependency(k1)
         }
     }
 
