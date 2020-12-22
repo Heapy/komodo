@@ -48,7 +48,9 @@ internal class DefaultModule(
  * @since 0.1.0
  */
 public interface Binder {
+    @ModuleDSL
     public fun dependency(module: ModuleProvider)
+    @ModuleDSL
     public fun contribute(binding: Binding)
 }
 
