@@ -9,5 +9,5 @@ plugins {
 
 dependencies {
     api(project(":komodo-di"))
-    implementation(kotlinReflect.dep())
+    implementation(kotlinReflect.dep)
 }

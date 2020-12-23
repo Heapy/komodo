@@ -42,8 +42,8 @@ class KomodoJvmPlugin : Plugin<Project> {
         pluginManager.apply(KotlinPluginWrapper::class)
 
         dependencies {
-            add("implementation", kotlinStdlib.dep())
-            add("implementation", kotlinxCoroutines.dep())
+            add("implementation", kotlinStdlib.dep)
+            add("implementation", kotlinxCoroutines.dep)
         }
     }
 
@@ -97,11 +97,11 @@ class KomodoJvmPlugin : Plugin<Project> {
         }
 
         dependencies {
-            add("testImplementation", kotlinxCoroutinesTest.dep())
-            add("testImplementation", mockk.dep())
-            add("testImplementation", jupiterApi.dep())
-            add("testRuntimeOnly", jupiterEngine.dep())
-            add("testRuntimeOnly", junitPlatformLauncher.dep())
+            add("testImplementation", kotlinxCoroutinesTest.dep)
+            add("testImplementation", mockk.dep)
+            add("testImplementation", jupiterApi.dep)
+            add("testRuntimeOnly", jupiterEngine.dep)
+            add("testRuntimeOnly", junitPlatformLauncher.dep)
         }
     }
 

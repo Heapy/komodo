@@ -114,7 +114,8 @@ data class Lib(
     val version: String,
     val publish: Boolean = true
 ) {
-    fun dep(): String = "$group:$artifact:$version"
+    val dep: String
+        get() = "$group:$artifact:$version"
 }
 
 private fun kotlinPluginVersion(): String {
