@@ -10,14 +10,14 @@ import org.slf4j.Marker
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-inline fun <reified T : Any> logger(): Logger = LoggerFactory.getLogger(T::class.java)
+public inline fun <reified T : Any> logger(): Logger = LoggerFactory.getLogger(T::class.java)
 
 /* TRACE */
 
 /**
  * Compute and log a message at the TRACE level.
  */
-inline fun Logger.trace(msg: () -> String) {
+public inline fun Logger.trace(msg: () -> String) {
     if (isTraceEnabled) {
         trace(msg())
     }
@@ -27,7 +27,7 @@ inline fun Logger.trace(msg: () -> String) {
  * Compute and log an exception (throwable) at the TRACE level with an
  * accompanying message.
  */
-inline fun Logger.trace(t: Throwable, msg: () -> String) {
+public inline fun Logger.trace(t: Throwable, msg: () -> String) {
     if (isTraceEnabled) {
         trace(msg(), t)
     }
@@ -36,7 +36,7 @@ inline fun Logger.trace(t: Throwable, msg: () -> String) {
 /**
  * Compute and log a message with the specific Marker at the TRACE level.
  */
-inline fun Logger.trace(marker: Marker, msg: () -> String) {
+public inline fun Logger.trace(marker: Marker, msg: () -> String) {
     if (isTraceEnabled(marker)) {
         trace(marker, msg())
     }
@@ -45,7 +45,7 @@ inline fun Logger.trace(marker: Marker, msg: () -> String) {
  * Compute and log an exception (throwable) at the TRACE level with an
  * accompanying message and specific Marker.
  */
-inline fun Logger.trace(marker: Marker, t: Throwable, msg: () -> String) {
+public inline fun Logger.trace(marker: Marker, t: Throwable, msg: () -> String) {
     if (isTraceEnabled(marker)) {
         trace(marker, msg(), t)
     }
@@ -56,7 +56,7 @@ inline fun Logger.trace(marker: Marker, t: Throwable, msg: () -> String) {
 /**
  * Compute and log a message at the DEBUG level.
  */
-inline fun Logger.debug(msg: () -> String) {
+public inline fun Logger.debug(msg: () -> String) {
     if (isDebugEnabled) {
         debug(msg())
     }
@@ -66,7 +66,7 @@ inline fun Logger.debug(msg: () -> String) {
  * Compute and log an exception (throwable) at the DEBUG level with an
  * accompanying message.
  */
-inline fun Logger.debug(t: Throwable, msg: () -> String) {
+public inline fun Logger.debug(t: Throwable, msg: () -> String) {
     if (isDebugEnabled) {
         debug(msg(), t)
     }
@@ -75,7 +75,7 @@ inline fun Logger.debug(t: Throwable, msg: () -> String) {
 /**
  * Compute and log a message with the specific Marker at the DEBUG level.
  */
-inline fun Logger.debug(marker: Marker, msg: () -> String) {
+public inline fun Logger.debug(marker: Marker, msg: () -> String) {
     if (isDebugEnabled(marker)) {
         debug(marker, msg())
     }
@@ -84,7 +84,7 @@ inline fun Logger.debug(marker: Marker, msg: () -> String) {
  * Compute and log an exception (throwable) at the DEBUG level with an
  * accompanying message and specific Marker.
  */
-inline fun Logger.debug(marker: Marker, t: Throwable, msg: () -> String) {
+public inline fun Logger.debug(marker: Marker, t: Throwable, msg: () -> String) {
     if (isDebugEnabled(marker)) {
         debug(marker, msg(), t)
     }
@@ -95,7 +95,7 @@ inline fun Logger.debug(marker: Marker, t: Throwable, msg: () -> String) {
 /**
  * Compute and log a message at the INFO level.
  */
-inline fun Logger.info(msg: () -> String) {
+public inline fun Logger.info(msg: () -> String) {
     if (isInfoEnabled) {
         info(msg())
     }
@@ -105,7 +105,7 @@ inline fun Logger.info(msg: () -> String) {
  * Compute and log an exception (throwable) at the INFO level with an
  * accompanying message.
  */
-inline fun Logger.info(t: Throwable, msg: () -> String) {
+public inline fun Logger.info(t: Throwable, msg: () -> String) {
     if (isInfoEnabled) {
         info(msg(), t)
     }
@@ -114,7 +114,7 @@ inline fun Logger.info(t: Throwable, msg: () -> String) {
 /**
  * Compute and log a message with the specific Marker at the INFO level.
  */
-inline fun Logger.info(marker: Marker, msg: () -> String) {
+public inline fun Logger.info(marker: Marker, msg: () -> String) {
     if (isInfoEnabled(marker)) {
         info(marker, msg())
     }
@@ -123,7 +123,7 @@ inline fun Logger.info(marker: Marker, msg: () -> String) {
  * Compute and log an exception (throwable) at the INFO level with an
  * accompanying message and specific Marker.
  */
-inline fun Logger.info(marker: Marker, t: Throwable, msg: () -> String) {
+public inline fun Logger.info(marker: Marker, t: Throwable, msg: () -> String) {
     if (isInfoEnabled(marker)) {
         info(marker, msg(), t)
     }
@@ -134,7 +134,7 @@ inline fun Logger.info(marker: Marker, t: Throwable, msg: () -> String) {
 /**
  * Compute and log a message at the WARN level.
  */
-inline fun Logger.warn(msg: () -> String) {
+public inline fun Logger.warn(msg: () -> String) {
     if (isWarnEnabled) {
         warn(msg())
     }
@@ -144,7 +144,7 @@ inline fun Logger.warn(msg: () -> String) {
  * Compute and log an exception (throwable) at the WARN level with an
  * accompanying message.
  */
-inline fun Logger.warn(t: Throwable, msg: () -> String) {
+public inline fun Logger.warn(t: Throwable, msg: () -> String) {
     if (isWarnEnabled) {
         warn(msg(), t)
     }
@@ -153,7 +153,7 @@ inline fun Logger.warn(t: Throwable, msg: () -> String) {
 /**
  * Compute and log a message with the specific Marker at the WARN level.
  */
-inline fun Logger.warn(marker: Marker, msg: () -> String) {
+public inline fun Logger.warn(marker: Marker, msg: () -> String) {
     if (isWarnEnabled(marker)) {
         warn(marker, msg())
     }
@@ -162,7 +162,7 @@ inline fun Logger.warn(marker: Marker, msg: () -> String) {
  * Compute and log an exception (throwable) at the WARN level with an
  * accompanying message and specific Marker.
  */
-inline fun Logger.warn(marker: Marker, t: Throwable, msg: () -> String) {
+public inline fun Logger.warn(marker: Marker, t: Throwable, msg: () -> String) {
     if (isWarnEnabled(marker)) {
         warn(marker, msg(), t)
     }
@@ -173,7 +173,7 @@ inline fun Logger.warn(marker: Marker, t: Throwable, msg: () -> String) {
 /**
  * Compute and log a message at the ERROR level.
  */
-inline fun Logger.error(msg: () -> String) {
+public inline fun Logger.error(msg: () -> String) {
     if (isErrorEnabled) {
         error(msg())
     }
@@ -183,7 +183,7 @@ inline fun Logger.error(msg: () -> String) {
  * Compute and log an exception (throwable) at the ERROR level with an
  * accompanying message.
  */
-inline fun Logger.error(t: Throwable, msg: () -> String) {
+public inline fun Logger.error(t: Throwable, msg: () -> String) {
     if (isErrorEnabled) {
         error(msg(), t)
     }
@@ -192,7 +192,7 @@ inline fun Logger.error(t: Throwable, msg: () -> String) {
 /**
  * Compute and log a message with the specific Marker at the ERROR level.
  */
-inline fun Logger.error(marker: Marker, msg: () -> String) {
+public inline fun Logger.error(marker: Marker, msg: () -> String) {
     if (isErrorEnabled(marker)) {
         error(marker, msg())
     }
@@ -201,7 +201,7 @@ inline fun Logger.error(marker: Marker, msg: () -> String) {
  * Compute and log an exception (throwable) at the ERROR level with an
  * accompanying message and specific Marker.
  */
-inline fun Logger.error(marker: Marker, t: Throwable, msg: () -> String) {
+public inline fun Logger.error(marker: Marker, t: Throwable, msg: () -> String) {
     if (isErrorEnabled(marker)) {
         error(marker, msg(), t)
     }

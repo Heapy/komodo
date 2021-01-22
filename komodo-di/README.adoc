@@ -1,6 +1,39 @@
+=== Komodo DI
 
 First-class concepts:
 
 - interface, constructor based injection
 - bean condition (on missing bean, on existing class, boolean expression with injection
 - wrapping (can wrap in aop)
+
+
+==== Other IoC frameworks for Kotlin
+
+*Popular options in Java:*
+
+* https://github.com/spring-projects/spring-framework
+* https://github.com/google/guice
+* https://github.com/google/dagger
+
+*Kotlin wrappers for Java:*
+
+* https://github.com/JLLeitschuh/kotlin-guiced
+* https://github.com/misfitlabsdev/kotlin-guice
+
+*Popular options in Kotlin:*
+
+* https://github.com/Kodein-Framework/Kodein-DI
+* https://github.com/InsertKoinIO/koin
+
+*Other known options in Kotlin:*
+
+* https://github.com/evant/kotlin-inject
+* https://github.com/traversals/kapsule
+* https://github.com/kailan/kodeinject
+* https://github.com/Rasalexman/KODI
+* https://github.com/corbella83/PopKorn
+* https://github.com/beyama/winter
+
+See comparison of many of these solutions:
+
+https://github.com/Heapy/di-comparison[IoC comparison]

@@ -10,28 +10,28 @@ object Libs {
     val kotlinScriptUtil = Lib("org.jetbrains.kotlin", "kotlin-script-util", kotlinVersion)
     val kotlinCompilerEmbeddable = Lib("org.jetbrains.kotlin", "kotlin-compiler-embeddable", kotlinVersion)
 
-    const val kotlinxCoroutinesVersion = "1.3.9"
+    const val kotlinxCoroutinesVersion = "1.4.2"
     val kotlinxCoroutines = Lib("org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8", kotlinxCoroutinesVersion)
     val kotlinxCoroutinesTest = Lib("org.jetbrains.kotlinx", "kotlinx-coroutines-test", kotlinxCoroutinesVersion)
 
-    const val slf4jVersion = "2.0.0-alpha1"
+    const val slf4jVersion = "1.7.30"
     val slf4jApi = Lib("org.slf4j", "slf4j-api", slf4jVersion)
     val slf4jSimple = Lib("org.slf4j", "slf4j-simple", slf4jVersion)
 
-    const val logbackVersion = "1.3.0-alpha5"
+    const val logbackVersion = "1.2.3"
     val logbackClassic = Lib("ch.qos.logback", "logback-classic", logbackVersion)
 
-    const val junitVersion = "5.6.2"
-    val jupiterApi = Lib("org.junit.jupiter", "junit-jupiter-api", junitVersion)
+    const val junitVersion = "5.7.0"
+        val jupiterApi = Lib("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     val jupiterEngine = Lib("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 
-    const val junitPlatformVersion = "1.6.2"
+    const val junitPlatformVersion = "1.7.0"
     val junitPlatformLauncher = Lib("org.junit.platform", "junit-platform-launcher", junitPlatformVersion)
 
-    const val mockkVersion = "1.10.0"
+    const val mockkVersion = "1.10.5"
     val mockk = Lib("io.mockk", "mockk", mockkVersion)
 
-    const val undertowVersion = "2.1.3.Final"
+    const val undertowVersion = "2.2.3.Final"
     val undertow = Lib("io.undertow", "undertow-core", undertowVersion)
 
     const val apacheHttpClientVersion = "4.1.4"
@@ -40,11 +40,11 @@ object Libs {
     const val hikariCPVersion = "3.4.5"
     val hikariCP = Lib("com.zaxxer", "HikariCP", hikariCPVersion)
 
-    const val ktorVersion = "1.3.1"
+    const val ktorVersion = "1.5.0"
     val ktorClientApache = Lib("io.ktor", "ktor-client-apache", ktorVersion)
     val ktorClientJackson = Lib("io.ktor", "ktor-client-jackson", ktorVersion)
 
-    const val jacksonVersion = "2.11.0"
+    const val jacksonVersion = "2.12.1"
     val jacksonKotlin = Lib("com.fasterxml.jackson.module", "jackson-module-kotlin", jacksonVersion)
     val jacksonXml = Lib("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", jacksonVersion)
 
@@ -103,7 +103,7 @@ object Libs {
             komodoLib("io.heapy.komodo", "komodo-root", false),
             komodoLib("io.heapy.komodo", "komodo-bom", false),
             komodoLib("io.heapy.komodo", "komodo-docs", false),
-            komodoLib("io.heapy.komodo", "komodo-logging", false)
+            komodoLib("io.heapy.komodo", "komodo-logging", true)
         )
     }
 }

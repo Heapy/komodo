@@ -86,7 +86,7 @@ class KomodoJvmPlugin : Plugin<Project> {
     }
 
     private fun Project.test() {
-        tasks.withType<Test> {
+        tasks.withType<Test>().configureEach {
             useJUnitPlatform()
 
             extensions.getByType<JacocoTaskExtension>().apply {

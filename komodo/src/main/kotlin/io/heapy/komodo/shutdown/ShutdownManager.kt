@@ -10,12 +10,17 @@ public interface ShutdownManager {
     /**
      * Initiates shutdown, because application completes invocation successfully.
      */
-    public fun shutdown(message: String): Nothing
+    public fun shutdown(message: String)
 
     /**
      * Initiates shutdown, because some exception that can't be recovered.
      */
-    public fun shutdown(throwable: Throwable, exitCode: Int = 1): Nothing
+    public fun shutdown(throwable: Throwable, exitCode: Int = 1)
+
+    /**
+     * Check current state of manager. Either shutdown called explicitly or system callback called.
+     */
+    public val isShuttingDown: Boolean
 
     /**
      * Adds listener to manager. Listener will be called upon shutdown.
