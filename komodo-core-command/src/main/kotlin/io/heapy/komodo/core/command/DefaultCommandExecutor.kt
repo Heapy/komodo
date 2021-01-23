@@ -1,19 +1,17 @@
 package io.heapy.komodo.core.command
 
 import io.heapy.komodo.exceptions.KomodoException
-import io.heapy.komodo.shutdown.ShutdownManager
 
 /**
  * @author Ruslan Ibragimov
  * @since 1.0
  */
 internal class DefaultCommandExecutor(
-    private val commands: List<Command>,
-    private val shutdownManager: ShutdownManager
+    private val commands: List<Command>
 ) : CommandExecutor {
     override suspend fun execute(name: String) {
         val command = commands.find { it.name == name }
-            ?: shutdownManager.shutdown(CommandNotFoundException(name))
+            ?: throw CommandNotFoundException(name)
 
         return command.run()
     }

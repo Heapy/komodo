@@ -8,14 +8,9 @@ package io.heapy.komodo.shutdown
  */
 public interface ShutdownManager {
     /**
-     * Initiates shutdown, because application completes invocation successfully.
+     * Initiates shutdown.
      */
-    public fun shutdown(message: String)
-
-    /**
-     * Initiates shutdown, because some exception that can't be recovered.
-     */
-    public fun shutdown(throwable: Throwable, exitCode: Int = 1)
+    public fun shutdown(message: String, exitCode: Int = 0): Nothing
 
     /**
      * Check current state of manager. Either shutdown called explicitly or system callback called.

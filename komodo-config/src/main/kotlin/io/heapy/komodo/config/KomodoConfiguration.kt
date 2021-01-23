@@ -9,10 +9,10 @@ import kotlin.reflect.typeOf
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-interface KomodoConfiguration {
-    suspend fun <T : Any> getConfig(type: KType): T?
+public interface KomodoConfiguration {
+    public suspend fun <T : Any> getConfig(type: KType): T?
 }
 
-suspend inline fun <reified T : Any> KomodoConfiguration.getConfig(): T? {
+public suspend inline fun <reified T : Any> KomodoConfiguration.getConfig(): T? {
     return getConfig(typeOf<T>())
 }

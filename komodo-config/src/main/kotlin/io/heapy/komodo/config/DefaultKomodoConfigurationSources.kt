@@ -4,7 +4,7 @@ import io.heapy.komodo.env.KomodoArgs
 import io.heapy.komodo.file.ByteStreamProvider
 import io.heapy.komodo.file.getInputStreamProvider
 
-class DefaultKomodoConfigurationSources(
+private class DefaultKomodoConfigurationSources(
     private val args: KomodoArgs
     // private val cmdParser: Parser// or KmdOptions
 ) : KomodoConfigurationSources {

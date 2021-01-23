@@ -16,39 +16,26 @@ import kotlin.system.exitProcess
 internal class JvmShutdownManager : ShutdownManager {
     private val listeners = CopyOnWriteArraySet<ShutdownListener>()
 
-    private val shutdownListener = thread(start = false) {
-        if (_isShuttingDown.getAndSet(true)) {
-            LOGGER.info("Shutdown already called, skipping system shutdown callback.")
-            return@thread
-        }
-        LOGGER.info("System shutdown callback called.")
-        shutdown()
-    }
-
     fun start() {
-        Runtime.getRuntime().addShutdownHook(shutdownListener)
+        Runtime.getRuntime().addShutdownHook(thread(start = false) {
+            if (_isShuttingDown.getAndSet(true)) {
+                LOGGER.info("Shutdown already called, skipping system shutdown callback.")
+                return@thread
+            }
+            LOGGER.info("System shutdown callback called.")
+            shutdown()
+        })
     }
 
-    override fun shutdown(message: String) {
+    override fun shutdown(message: String, exitCode: Int): Nothing {
         if (_isShuttingDown.getAndSet(true)) {
-            LOGGER.info("Shutdown already called, skipping user shutdown callback.")
-            return
+            LOGGER.info("Shutdown already called, skipping user shutdown request.")
+            exitProcess(exitCode)
+        } else {
+            LOGGER.info("Application shutting down: $message")
+            shutdown()
+            exitProcess(exitCode)
         }
-        LOGGER.info("Application shutting down: $message")
-        Runtime.getRuntime().removeShutdownHook(shutdownListener)
-        shutdown()
-        exitProcess(0)
-    }
-
-    override fun shutdown(throwable: Throwable, exitCode: Int) {
-        if (_isShuttingDown.getAndSet(true)) {
-            LOGGER.info("Shutdown already called, skipping user shutdown callback.")
-            return
-        }
-        LOGGER.info("Application shutting down exceptionally: {}", throwable.message)
-        Runtime.getRuntime().removeShutdownHook(shutdownListener)
-        shutdown()
-        exitProcess(exitCode)
     }
 
     private val _isShuttingDown = AtomicBoolean(false)
