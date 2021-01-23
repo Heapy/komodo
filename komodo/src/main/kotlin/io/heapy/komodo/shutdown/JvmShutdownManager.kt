@@ -13,10 +13,10 @@ import kotlin.system.exitProcess
  * @author Ruslan Ibragimov
  * @since 1.0
  */
-internal class JvmShutdownManager : ShutdownManager {
+public class JvmShutdownManager : ShutdownManager {
     private val listeners = CopyOnWriteArraySet<ShutdownListener>()
 
-    fun start() {
+    public fun start() {
         Runtime.getRuntime().addShutdownHook(thread(start = false) {
             if (_isShuttingDown.getAndSet(true)) {
                 LOGGER.info("Shutdown already called, skipping system shutdown callback.")
@@ -40,7 +40,7 @@ internal class JvmShutdownManager : ShutdownManager {
 
     private val _isShuttingDown = AtomicBoolean(false)
 
-    override val isShuttingDown = _isShuttingDown.get()
+    override val isShuttingDown: Boolean = _isShuttingDown.get()
 
     override fun addShutdownListener(
         name: String,
@@ -71,7 +71,7 @@ internal class JvmShutdownManager : ShutdownManager {
         }
     }
 
-    companion object {
+    private companion object {
         private val LOGGER = logger<JvmShutdownManager>()
     }
 }
