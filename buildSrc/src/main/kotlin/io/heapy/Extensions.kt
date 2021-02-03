@@ -6,8 +6,8 @@ import org.gradle.kotlin.dsl.repositories
 object Extensions {
     fun Project.defaultRepositories() {
         repositories {
-            jcenter()
-            maven { url = uri("https://dl.bintray.com/heapy/heap/") }
+            mavenCentral()
+            maven { url = uri("https://repo.kotlin.link") }
         }
     }
 }

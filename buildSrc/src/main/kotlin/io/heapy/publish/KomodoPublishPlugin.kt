@@ -1,6 +1,5 @@
 package io.heapy.publish
 
-import com.jfrog.bintray.gradle.BintrayExtension
 import io.heapy.Extensions.defaultRepositories
 import io.heapy.Libs.getKomodoLibraries
 import io.heapy.Lib
@@ -8,6 +7,7 @@ import io.heapy.Libs.libraries
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.credentials.AwsCredentials
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPublication
@@ -20,7 +20,6 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.plugins.signing.SigningExtension
 import org.jetbrains.dokka.gradle.DokkaTask
-import java.util.Date
 
 /**
  * Plugin which setups defaults for publishing
@@ -34,7 +33,6 @@ class KomodoPublishPlugin : Plugin<Project> {
         project.pluginManager.apply("signing")
         project.pluginManager.apply("java-library")
         project.pluginManager.apply("maven-publish")
-        project.pluginManager.apply("com.jfrog.bintray")
         project.pluginManager.apply("org.jetbrains.dokka")
 
         val isBOM = project.name == "komodo-bom"
@@ -45,6 +43,16 @@ class KomodoPublishPlugin : Plugin<Project> {
             lateinit var komodoPublication: MavenPublication
 
             project.extensions.getByType<PublishingExtension>().apply {
+                repositories {
+                    maven {
+                        url = uri("s3://heapy")
+                        credentials(AwsCredentials::class.java) {
+                            accessKey = System.getenv("AWS_ACCESS_KEY_ID")
+                            secretKey = System.getenv("AWS_SECRET_ACCESS_KEY")
+                        }
+                    }
+                }
+
                 publications {
                     komodoPublication = create<MavenPublication>("komodo") {
                         if (!isBOM) {
@@ -104,30 +112,6 @@ class KomodoPublishPlugin : Plugin<Project> {
             project.extensions.getByType<SigningExtension>().apply {
                 setRequired(false)
                 sign(komodoPublication)
-            }
-
-            val isDev = project.version.toString().contains("development")
-
-            project.extensions.getByType<BintrayExtension>().apply {
-                user = System.getenv("BINTRAY_USER")
-                key = System.getenv("BINTRAY_API_KEY")
-
-                pkg = PackageConfig().apply {
-                    userOrg = "heapy"
-                    repo = if (isDev) "heap-dev" else "releases"
-                    name = "komodo"
-                    websiteUrl = "https://heapy.io/komodo"
-                    publish = isDev
-                    setLicenses("LGPL-3.0")
-                    vcsUrl = "https://github.com/Heapy/komodo"
-                    setPublications("komodo")
-                    publicDownloadNumbers = true
-                    version = VersionConfig().apply {
-                        name = project.version.toString()
-                        released = Date().toString()
-                        vcsTag = project.version.toString()
-                    }
-                }
             }
         }
     }
