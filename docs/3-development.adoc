@@ -1,12 +1,11 @@
 == How To Release Komodo
 
-Each commit releases new version of komodo in https://bintray.com/heapy/heap-dev[heap-dev] repository, using latest version in current branch with suffix `dev` and build number.
-Each tagged commit releases new version of komodo in heap repository, using tag as version.
+Each commit releases new version of komodo in https://repo.kotlin.link[repo.kotlin.link] repository, using latest version in current branch with suffix `development` and build number.
+Each tagged commit releases a new version of komodo in maven central repository, using tag as version.
 
 === Plugins used for publishing
 
 - https://github.com/Kotlin/dokka[Dokka] - used to document Kotlin code;
 - https://docs.gradle.org/current/userguide/java_library_plugin.html[Java Library] - used to declare `api`/`implementation` configurations, instead of just `compile`;
 - https://docs.gradle.org/4.10.2/userguide/publishing_maven.html[Maven Publish] - Used to declare what we like to publish, configure pom;
-- https://github.com/bintray/gradle-bintray-plugin[Bintray] - this plugin used to upload publication to bintray;
 - https://docs.gradle.org/4.10.2/userguide/signing_plugin.html[Signing] - Not used currently, but we have plans to use it in future, to sign all artifacts.

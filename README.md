@@ -2,7 +2,7 @@
 
 # Painless way to build software 
 
-[![Build Status](https://travis-ci.com/Heapy/komodo.svg?branch=develop)](https://travis-ci.com/Heapy/komodo) [![Download](https://api.bintray.com/packages/heapy/heap-dev/komodo/images/download.svg)](https://bintray.com/heapy/heap-dev/komodo/_latestVersion) [![codecov](https://codecov.io/gh/Heapy/komodo/branch/master/graph/badge.svg)](https://codecov.io/gh/Heapy/komodo)
+[![Build Status](https://travis-ci.com/Heapy/komodo.svg?branch=develop)](https://travis-ci.com/Heapy/komodo) ![Maven metadata URL](https://img.shields.io/maven-metadata/v?color=18b4f7&label=repo.kotlin.link&metadataUrl=https%3A%2F%2Fheapy.s3.eu-central-1.amazonaws.com%2Fio%2Fheapy%2Fkomodo%2Fkomodo%2Fmaven-metadata.xml) [![codecov](https://codecov.io/gh/Heapy/komodo/branch/master/graph/badge.svg)](https://codecov.io/gh/Heapy/komodo)
 
 **Komodo** - is a framework aims to simplify development of modern web applications.
 
