@@ -23,7 +23,7 @@ class KomodoVersionPlugin : Plugin<Project> {
             // Branch master, and it's PR
 
             project.allprojects.forEach {
-                it.version = "$currentVersion-development+${buildNumber.padStart(6, '0')}"
+                it.version = "$currentVersion-development.${buildNumber.padStart(6, '0')}"
             }
         }
 
