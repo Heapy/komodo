@@ -4,12 +4,12 @@ import java.time.LocalDate
 import kotlin.text.Charsets.UTF_8
 
 plugins {
-    id("org.asciidoctor.jvm.convert").version("3.1.0")
-    id("org.asciidoctor.jvm.pdf").version("3.1.0")
+    id("org.asciidoctor.jvm.convert").version("3.3.1")
+    id("org.asciidoctor.jvm.pdf").version("3.3.1")
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 /**

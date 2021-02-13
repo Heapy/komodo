@@ -12,19 +12,19 @@ image::logo.png[align=center]
 - https://travis-ci.com/Heapy/komodo[Travis CI]
 - https://heapy.s3.eu-central-1.amazonaws.com[Artifacts]
 
-image::https://img.shields.io/maven-metadata/v?color=18b4f7&label=repo.kotlin.link&metadataUrl=https%3A%2F%2Fheapy.s3.eu-central-1.amazonaws.com%2Fio%2Fheapy%2Fkomodo%2Fkomodo%2Fmaven-metadata.xml[]
-
 == Hello, World!
 
 [source,kotlin,subs="attributes+"]
 ----
 // build.gradle.kts
 plugins {
-    kotlin("jvm").version("1.3.70")
+    kotlin("jvm").version("1.4.30")
 }
 
 repositories {
-    jcenter()
+    maven {
+        url = uri("https://repo.kotlin.link")
+    }
 }
 
 dependencies {

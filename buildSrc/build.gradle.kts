@@ -6,7 +6,7 @@ val kotlinVersion: String by project
 val dokkaVersion: String by project
 
 repositories {
-    jcenter()
+    mavenCentral()
     gradlePluginPortal()
 }
 

@@ -61,6 +61,7 @@ class KomodoJvmPlugin : Plugin<Project> {
 
         tasks.named<KotlinCompile>("compileTestKotlin") {
             kotlinOptions {
+                useIR = true
                 languageVersion = kotlinLanguageVersion
                 freeCompilerArgs = freeCompilerArgs + commonCompilerArgs + listOf(
                     "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
@@ -71,6 +72,7 @@ class KomodoJvmPlugin : Plugin<Project> {
 
         tasks.named<KotlinCompile>("compileKotlin") {
             kotlinOptions {
+                useIR = true
                 languageVersion = kotlinLanguageVersion
                 freeCompilerArgs = freeCompilerArgs + commonCompilerArgs + listOf(
                     "-Xexplicit-api=warning"
