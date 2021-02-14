@@ -1,14 +1,16 @@
 == What is Komodo
 
-Core of Komodo - Dependency Injection and set of ready to use services like: configuration, module loading, etc.
+Core of Komodo - Inversion of Control library and set of ready to use services like: configuration, module loading, etc. We're thinking about performance, maintainability and developer experience:
 
-So it should be easy to replace any service with own implementation, or even replace all parts of Komodo, even DI library itself.
+- performance – Komodo shouldn't affect compile or runtime performance, provide zero cost abstractions or best effort;
+- maintainability – encourage best practices, clean and understandable code;
+- developer experience – provide maximum value with minimal effort.
 
-We heavily use Kotlin features, and doesn't care about Java users of framework. For example we use Kotlin Coroutines, which currently (Kotlin 1.2) has experimental status.
+We heavily use Kotlin features, and doesn't care about Java users of framework. API for Java can be harder to use, but because of Kotlin interoperability Java developer should be able to use Komodo.
 
 == When to Use?
 
-We hope that framework will be ideal for small applications, microservices, web-servers. This is replacement for JavaEE webservers, and Spring-*.
+We hope that framework will be ideal for small applications, microservices, web-servers. This is replacement for JavaEE webservers, microprofile, micro-frameworks and Spring Boot.
 
 == Goals
 

@@ -1,8 +1,8 @@
 == Module system
 
-Today is obvious that any application builds from small and big, reusable or not parts. This parts can be functions or classes. Own and 3rd party libraries.'
+Today is obvious that any application builds from small and big, reusable or not parts. This parts can be functions or classes. Own and 3rd party libraries.
 
-In Komodo module it's a number of classes, joint by some attribute: product feature, layer in architecture or some functionality provided by library behind a module.
+In Komodo module it's a number of classes, joint by some attribute: product feature, layer in architecture, or some functionality provided by library behind a module.
 
 In general, what determines the need for modules, and what problem they solve in Komodo:
 
@@ -19,19 +19,6 @@ Komodo provides number of ready to use modules for popular libraries, like logba
 Even Spring Boot and Spring Framework have functionality close to Komodo Modules:
 
 Spring Context can be built from few separate XMLs, or Programmatic Configs, each of these XML or @Configuration files can be think like module;
-Spring Boot Starters also similar to Komodo modules, but they do all configuration under the hood. Komodo modules is not convention over configuration, you have to explicitly use or request particular module.
+Spring Boot Starters also similar to Komodo modules, but they do all configuration under the hood. Komodo modules is not convention over configuration, you have to explicitly use or request a particular module.
 
 '''
-
-=== Komodo Abstract Modules
-
-Abstract modules serves two main purposes:
-
-. Provide implementation for common interfaces like `DataSource`;
-. Create plugin system, when concrete implementations retrieved on runtime using `ServiceLoader` API.
-
-[source, kotlin]
-----
- bind.module(JdbcModule::class).to(HikaryJdbcModule::class) // in top level module
- bind.module(JdbcModule::class).toProvider(ServiceLoaderProvider::class) // in top level module
-----
